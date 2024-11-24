@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { CompositeGeneratorNode, NL, toString } from 'langium';
 import path from 'path';
-import { Action, Actuator, App, Sensor, State, Transition } from '../language-server/generated/ast';
+import {Action, Actuator, App, Sensor, State, SubCondition, Transition} from '../language-server/generated/ast';
 import { extractDestinationAndName } from './cli-util';
 
 export function generateInoFile(app: App, filePath: string, destination: string | undefined): string {
@@ -99,12 +99,42 @@ long `+brick.name+`LastDebounceTime = 0;
 	}
 
 	function compileTransition(transition: Transition, fileNode:CompositeGeneratorNode) {
-		fileNode.append(`
-		 			`+transition.sensor.ref?.name+`BounceGuard = millis() - `+transition.sensor.ref?.name+`LastDebounceTime > debounce;
-					if( digitalRead(`+transition.sensor.ref?.inputPin+`) == `+transition.value.value+` && `+transition.sensor.ref?.name+`BounceGuard) {
-						`+transition.sensor.ref?.name+`LastDebounceTime = millis();
-						currentState = `+transition.next.ref?.name+`;
-					}
-		`)
+		// fileNode.append(`
+		//  			`+transition.sensor.ref?.name+`BounceGuard = millis() - `+transition.sensor.ref?.name+`LastDebounceTime > debounce;
+		// 			if( digitalRead(`+transition.sensor.ref?.inputPin+`) == `+transition.value.value+` && `+transition.sensor.ref?.name+`BounceGuard) {
+		// 				`+transition.sensor.ref?.name+`LastDebounceTime = millis();
+		// 				currentState = `+transition.next.ref?.name+`;
+		// 			}
+		// `)
+        fileNode.append(`
+                    ` + transition.condition.mandatoryCondition.sensor.ref?.name + `BounceGuard = millis() - ` + transition.condition.mandatoryCondition.sensor.ref?.name + `LastDebounceTime > debounce;
+                    `)
+        compileOptionalConditionsBounceGuard(transition.condition.optionalConditions, fileNode)
+        fileNode.append(`
+                    if (digitalRead(`+transition.condition.mandatoryCondition.sensor.ref?.inputPin +`) == `+transition.condition.mandatoryCondition.value.value + ` && ` + transition.condition.mandatoryCondition.sensor.ref?.name + `BounceGuard`
+        )
+        compileOptionalConditions(transition.condition.optionalConditions, fileNode)
+        fileNode.append(`)  {
+                        currentState = `+transition.next.ref?.name+`;
+                        ` + transition.condition.mandatoryCondition.sensor.ref?.name + `LastDebounceTime = millis();
+                        ` + transition.condition.optionalConditions.map(optionalCondition => optionalCondition.condition.sensor.ref?.name + `LastDebounceTime = millis(); `).join('\n') + `
+                    }`
+        )
 	}
+
+    function compileOptionalConditionsBounceGuard(optionalConditions: SubCondition[], fileNode:CompositeGeneratorNode) {
+        for (const optionalCondition of optionalConditions){
+            fileNode.append(optionalCondition.condition.sensor.ref?.name + `BounceGuard = millis() - ` + optionalCondition.condition.sensor.ref?.name + `LastDebounceTime > debounce;
+            `
+            )
+        }
+}
+    function compileOptionalConditions(optionalConditions: SubCondition[], fileNode:CompositeGeneratorNode){
+        for (const optionalCondition of optionalConditions){
+            fileNode.append(`
+                        ` + (optionalCondition.operator.value == "AND" ? "&&" : "||") + ` ` + `( digitalRead(`+optionalCondition.condition.sensor.ref?.inputPin +`) == `+optionalCondition.condition.value.value + ` && ` + optionalCondition.condition.sensor.ref?.name + `BounceGuard)`
+            )
+        }
+
+    }
 

@@ -5,11 +5,11 @@ entry App:
 	'{'
 		'bricks'
 		bricks+=Brick
-		(bricks+=Brick)* 
-		
+		(bricks+=Brick)*
+
 		'states'
 		states+=State
-		( states+=State)* 		
+		( states+=State)*
 	'}';
 
 Brick :
@@ -22,11 +22,11 @@ Actuator:
 Sensor :
 	{infer Sensor}
 	'Sensor'  name=ID ':' inputPin=INT;
-	
+
 State :
 	name=ID '{'
 		actions+=Action
-		(actions+=Action)* 
+		(actions+=Action)*
 		transition=Transition
 	'}';
 
@@ -35,22 +35,7 @@ Action :
 	actuator=[Actuator:ID] '<=' value=Signal;
 
 Transition :
-	condition=Condition '=>' next=[State:ID];
-
-Condition :
-    mandatoryCondition=SensorCondition
-    (optionalConditions+=SubCondition)*;
-
-SubCondition:
-    operator=LogicalOperator condition=SensorCondition;
-
-SensorCondition:
-    sensor=[Sensor:ID] 'is' value=Signal;
-
-LogicalOperator:
-    value=(AND | OR);
-terminal AND: 'AND';
-terminal OR: 'OR';
+	sensor=[Sensor:ID] 'is' value=Signal '=>' next=[State:ID];
 
 Signal:
     value=(HIGH | LOW);

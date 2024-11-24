@@ -88,12 +88,38 @@ function compileAction(action, fileNode) {
 }
 function compileTransition(transition, fileNode) {
     var _a, _b, _c, _d, _e, _f;
+    // fileNode.append(`
+    //  			`+transition.sensor.ref?.name+`BounceGuard = millis() - `+transition.sensor.ref?.name+`LastDebounceTime > debounce;
+    // 			if( digitalRead(`+transition.sensor.ref?.inputPin+`) == `+transition.value.value+` && `+transition.sensor.ref?.name+`BounceGuard) {
+    // 				`+transition.sensor.ref?.name+`LastDebounceTime = millis();
+    // 				currentState = `+transition.next.ref?.name+`;
+    // 			}
+    // `)
     fileNode.append(`
-		 			` + ((_a = transition.sensor.ref) === null || _a === void 0 ? void 0 : _a.name) + `BounceGuard = millis() - ` + ((_b = transition.sensor.ref) === null || _b === void 0 ? void 0 : _b.name) + `LastDebounceTime > debounce;
-					if( digitalRead(` + ((_c = transition.sensor.ref) === null || _c === void 0 ? void 0 : _c.inputPin) + `) == ` + transition.value.value + ` && ` + ((_d = transition.sensor.ref) === null || _d === void 0 ? void 0 : _d.name) + `BounceGuard) {
-						` + ((_e = transition.sensor.ref) === null || _e === void 0 ? void 0 : _e.name) + `LastDebounceTime = millis();
-						currentState = ` + ((_f = transition.next.ref) === null || _f === void 0 ? void 0 : _f.name) + `;
-					}
-		`);
+                    ` + ((_a = transition.condition.mandatoryCondition.sensor.ref) === null || _a === void 0 ? void 0 : _a.name) + `BounceGuard = millis() - ` + ((_b = transition.condition.mandatoryCondition.sensor.ref) === null || _b === void 0 ? void 0 : _b.name) + `LastDebounceTime > debounce;
+                    `);
+    compileOptionalConditionsBounceGuard(transition.condition.optionalConditions, fileNode);
+    fileNode.append(`
+                    if (digitalRead(` + ((_c = transition.condition.mandatoryCondition.sensor.ref) === null || _c === void 0 ? void 0 : _c.inputPin) + `) == ` + transition.condition.mandatoryCondition.value.value + ` && ` + ((_d = transition.condition.mandatoryCondition.sensor.ref) === null || _d === void 0 ? void 0 : _d.name) + `BounceGuard`);
+    compileOptionalConditions(transition.condition.optionalConditions, fileNode);
+    fileNode.append(`)  {
+                        currentState = ` + ((_e = transition.next.ref) === null || _e === void 0 ? void 0 : _e.name) + `;
+                        ` + ((_f = transition.condition.mandatoryCondition.sensor.ref) === null || _f === void 0 ? void 0 : _f.name) + `LastDebounceTime = millis();
+                        ` + transition.condition.optionalConditions.map(optionalCondition => { var _a; return ((_a = optionalCondition.condition.sensor.ref) === null || _a === void 0 ? void 0 : _a.name) + `LastDebounceTime = millis(); `; }).join('\n') + `
+                    }`);
+}
+function compileOptionalConditionsBounceGuard(optionalConditions, fileNode) {
+    var _a, _b;
+    for (const optionalCondition of optionalConditions) {
+        fileNode.append(((_a = optionalCondition.condition.sensor.ref) === null || _a === void 0 ? void 0 : _a.name) + `BounceGuard = millis() - ` + ((_b = optionalCondition.condition.sensor.ref) === null || _b === void 0 ? void 0 : _b.name) + `LastDebounceTime > debounce;
+            `);
+    }
+}
+function compileOptionalConditions(optionalConditions, fileNode) {
+    var _a, _b;
+    for (const optionalCondition of optionalConditions) {
+        fileNode.append(`
+                        ` + (optionalCondition.operator.value == "AND" ? "&&" : "||") + ` ` + `( digitalRead(` + ((_a = optionalCondition.condition.sensor.ref) === null || _a === void 0 ? void 0 : _a.inputPin) + `) == ` + optionalCondition.condition.value.value + ` && ` + ((_b = optionalCondition.condition.sensor.ref) === null || _b === void 0 ? void 0 : _b.name) + `BounceGuard)`);
+    }
 }
 //# sourceMappingURL=generator.js.map

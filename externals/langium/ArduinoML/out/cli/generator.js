@@ -79,7 +79,7 @@ function compileState(state, fileNode) {
         compileTransition(state.transition, fileNode);
     }
     fileNode.append(`
-				break;`);
+                    break;`);
 }
 function compileAction(action, fileNode) {
     var _a;
@@ -87,39 +87,75 @@ function compileAction(action, fileNode) {
 					digitalWrite(` + ((_a = action.actuator.ref) === null || _a === void 0 ? void 0 : _a.outputPin) + `,` + action.value.value + `);`);
 }
 function compileTransition(transition, fileNode) {
-    var _a, _b, _c, _d, _e, _f;
-    // fileNode.append(`
-    //  			`+transition.sensor.ref?.name+`BounceGuard = millis() - `+transition.sensor.ref?.name+`LastDebounceTime > debounce;
-    // 			if( digitalRead(`+transition.sensor.ref?.inputPin+`) == `+transition.value.value+` && `+transition.sensor.ref?.name+`BounceGuard) {
-    // 				`+transition.sensor.ref?.name+`LastDebounceTime = millis();
-    // 				currentState = `+transition.next.ref?.name+`;
-    // 			}
-    // `)
-    fileNode.append(`
-                    ` + ((_a = transition.condition.mandatoryCondition.sensor.ref) === null || _a === void 0 ? void 0 : _a.name) + `BounceGuard = millis() - ` + ((_b = transition.condition.mandatoryCondition.sensor.ref) === null || _b === void 0 ? void 0 : _b.name) + `LastDebounceTime > debounce;
-                    `);
-    compileOptionalConditionsBounceGuard(transition.condition.optionalConditions, fileNode);
-    fileNode.append(`
-                    if (digitalRead(` + ((_c = transition.condition.mandatoryCondition.sensor.ref) === null || _c === void 0 ? void 0 : _c.inputPin) + `) == ` + transition.condition.mandatoryCondition.value.value + ` && ` + ((_d = transition.condition.mandatoryCondition.sensor.ref) === null || _d === void 0 ? void 0 : _d.name) + `BounceGuard`);
-    compileOptionalConditions(transition.condition.optionalConditions, fileNode);
-    fileNode.append(`)  {
-                        currentState = ` + ((_e = transition.next.ref) === null || _e === void 0 ? void 0 : _e.name) + `;
-                        ` + ((_f = transition.condition.mandatoryCondition.sensor.ref) === null || _f === void 0 ? void 0 : _f.name) + `LastDebounceTime = millis();
-                        ` + transition.condition.optionalConditions.map(optionalCondition => { var _a; return ((_a = optionalCondition.condition.sensor.ref) === null || _a === void 0 ? void 0 : _a.name) + `LastDebounceTime = millis(); `; }).join('\n') + `
-                    }`);
-}
-function compileOptionalConditionsBounceGuard(optionalConditions, fileNode) {
-    var _a, _b;
-    for (const optionalCondition of optionalConditions) {
-        fileNode.append(((_a = optionalCondition.condition.sensor.ref) === null || _a === void 0 ? void 0 : _a.name) + `BounceGuard = millis() - ` + ((_b = optionalCondition.condition.sensor.ref) === null || _b === void 0 ? void 0 : _b.name) + `LastDebounceTime > debounce;
-            `);
-    }
-}
-function compileOptionalConditions(optionalConditions, fileNode) {
-    var _a, _b;
-    for (const optionalCondition of optionalConditions) {
+    var _a;
+    const sensors = getSensors(transition.condition);
+    for (const sensor of sensors) {
         fileNode.append(`
-                        ` + (optionalCondition.operator.value == "AND" ? "&&" : "||") + ` ` + `( digitalRead(` + ((_a = optionalCondition.condition.sensor.ref) === null || _a === void 0 ? void 0 : _a.inputPin) + `) == ` + optionalCondition.condition.value.value + ` && ` + ((_b = optionalCondition.condition.sensor.ref) === null || _b === void 0 ? void 0 : _b.name) + `BounceGuard)`);
+                    ` + sensor.name + `BounceGuard = millis() - ` + sensor.name + `LastDebounceTime > debounce;`);
     }
+    fileNode.append(`
+                    if (`);
+    compileCondition(transition.condition, fileNode);
+    fileNode.append(`)  {`);
+    fileNode.append(`
+                        currentState = ` + ((_a = transition.next.ref) === null || _a === void 0 ? void 0 : _a.name) + `;`);
+    for (const sensor of sensors) {
+        fileNode.append(`
+                        ` + sensor.name + `LastDebounceTime = millis();`);
+    }
+}
+function getSensors(condition) {
+    switch (condition.$type) {
+        case "SensorCondition":
+            if (condition.sensor.ref === undefined)
+                return [];
+            return [condition.sensor.ref];
+        case "UnaryCondition":
+            return [...getSensors(condition.condition)];
+        case "BinaryCondition":
+            return [...getSensors(condition.left), ...getSensors(condition.right)];
+    }
+}
+function compileCondition(condition, fileNode) {
+    switch (condition.$type) {
+        case "SensorCondition":
+            compileSensorCondition(condition, fileNode);
+            break;
+        case "BinaryCondition":
+            compileBinaryCondition(condition, fileNode);
+            break;
+        case "UnaryCondition":
+            compileUnaryCondition(condition, fileNode);
+            break;
+    }
+}
+function compileSensorCondition(sensorCondition, fileNode) {
+    var _a, _b;
+    //the bounce
+    fileNode.append(`( digitalRead(` + ((_a = sensorCondition.sensor.ref) === null || _a === void 0 ? void 0 : _a.inputPin) + `) == ` + sensorCondition.value.value + `  && ` + ((_b = sensorCondition.sensor.ref) === null || _b === void 0 ? void 0 : _b.name) + `BounceGuard)`);
+}
+function compileUnaryCondition(unaryCondition, fileNode) {
+    fileNode.append(`(` + getOperator(unaryCondition.operator.value) + ` `);
+    compileCondition(unaryCondition.condition, fileNode);
+    fileNode.append(`)`);
+}
+function getOperator(operator) {
+    switch (operator) {
+        case "AND":
+            return "&&";
+        case "OR":
+            return "||";
+        case "NOT":
+            return "!";
+        default:
+            return operator;
+    }
+}
+function compileBinaryCondition(binaryCondition, fileNode) {
+    fileNode.append(`(`);
+    compileCondition(binaryCondition.left, fileNode);
+    fileNode.append(` ` + getOperator(binaryCondition.operator.value) + ` `);
+    compileCondition(binaryCondition.right, fileNode);
+    fileNode.append(`)`);
 }
 //# sourceMappingURL=generator.js.map

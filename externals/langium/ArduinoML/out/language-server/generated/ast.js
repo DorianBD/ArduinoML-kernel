@@ -4,7 +4,7 @@
  * DO NOT EDIT MANUALLY!
  ******************************************************************************/
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reflection = exports.ArduinoMlAstReflection = exports.isTransition = exports.Transition = exports.isSubCondition = exports.SubCondition = exports.isState = exports.State = exports.isSignal = exports.Signal = exports.isSensorCondition = exports.SensorCondition = exports.isSensor = exports.Sensor = exports.isLogicalOperator = exports.LogicalOperator = exports.isCondition = exports.Condition = exports.isApp = exports.App = exports.isActuator = exports.Actuator = exports.isAction = exports.Action = exports.isBrick = exports.Brick = void 0;
+exports.reflection = exports.ArduinoMlAstReflection = exports.isUnaryOperator = exports.UnaryOperator = exports.isUnaryCondition = exports.UnaryCondition = exports.isTransition = exports.Transition = exports.isState = exports.State = exports.isSignal = exports.Signal = exports.isSensorCondition = exports.SensorCondition = exports.isSensor = exports.Sensor = exports.isBinaryOperator = exports.BinaryOperator = exports.isBinaryCondition = exports.BinaryCondition = exports.isApp = exports.App = exports.isActuator = exports.Actuator = exports.isAction = exports.Action = exports.isTerminalCondition = exports.TerminalCondition = exports.isCondition = exports.Condition = exports.isBrick = exports.Brick = void 0;
 /* eslint-disable */
 const langium_1 = require("langium");
 exports.Brick = 'Brick';
@@ -12,6 +12,16 @@ function isBrick(item) {
     return exports.reflection.isInstance(item, exports.Brick);
 }
 exports.isBrick = isBrick;
+exports.Condition = 'Condition';
+function isCondition(item) {
+    return exports.reflection.isInstance(item, exports.Condition);
+}
+exports.isCondition = isCondition;
+exports.TerminalCondition = 'TerminalCondition';
+function isTerminalCondition(item) {
+    return exports.reflection.isInstance(item, exports.TerminalCondition);
+}
+exports.isTerminalCondition = isTerminalCondition;
 exports.Action = 'Action';
 function isAction(item) {
     return exports.reflection.isInstance(item, exports.Action);
@@ -27,16 +37,16 @@ function isApp(item) {
     return exports.reflection.isInstance(item, exports.App);
 }
 exports.isApp = isApp;
-exports.Condition = 'Condition';
-function isCondition(item) {
-    return exports.reflection.isInstance(item, exports.Condition);
+exports.BinaryCondition = 'BinaryCondition';
+function isBinaryCondition(item) {
+    return exports.reflection.isInstance(item, exports.BinaryCondition);
 }
-exports.isCondition = isCondition;
-exports.LogicalOperator = 'LogicalOperator';
-function isLogicalOperator(item) {
-    return exports.reflection.isInstance(item, exports.LogicalOperator);
+exports.isBinaryCondition = isBinaryCondition;
+exports.BinaryOperator = 'BinaryOperator';
+function isBinaryOperator(item) {
+    return exports.reflection.isInstance(item, exports.BinaryOperator);
 }
-exports.isLogicalOperator = isLogicalOperator;
+exports.isBinaryOperator = isBinaryOperator;
 exports.Sensor = 'Sensor';
 function isSensor(item) {
     return exports.reflection.isInstance(item, exports.Sensor);
@@ -57,25 +67,38 @@ function isState(item) {
     return exports.reflection.isInstance(item, exports.State);
 }
 exports.isState = isState;
-exports.SubCondition = 'SubCondition';
-function isSubCondition(item) {
-    return exports.reflection.isInstance(item, exports.SubCondition);
-}
-exports.isSubCondition = isSubCondition;
 exports.Transition = 'Transition';
 function isTransition(item) {
     return exports.reflection.isInstance(item, exports.Transition);
 }
 exports.isTransition = isTransition;
+exports.UnaryCondition = 'UnaryCondition';
+function isUnaryCondition(item) {
+    return exports.reflection.isInstance(item, exports.UnaryCondition);
+}
+exports.isUnaryCondition = isUnaryCondition;
+exports.UnaryOperator = 'UnaryOperator';
+function isUnaryOperator(item) {
+    return exports.reflection.isInstance(item, exports.UnaryOperator);
+}
+exports.isUnaryOperator = isUnaryOperator;
 class ArduinoMlAstReflection extends langium_1.AbstractAstReflection {
     getAllTypes() {
-        return ['Action', 'Actuator', 'App', 'Brick', 'Condition', 'LogicalOperator', 'Sensor', 'SensorCondition', 'Signal', 'State', 'SubCondition', 'Transition'];
+        return ['Action', 'Actuator', 'App', 'BinaryCondition', 'BinaryOperator', 'Brick', 'Condition', 'Sensor', 'SensorCondition', 'Signal', 'State', 'TerminalCondition', 'Transition', 'UnaryCondition', 'UnaryOperator'];
     }
     computeIsSubtype(subtype, supertype) {
         switch (subtype) {
             case exports.Actuator:
             case exports.Sensor: {
                 return this.isSubtype(exports.Brick, supertype);
+            }
+            case exports.BinaryCondition:
+            case exports.UnaryCondition:
+            case exports.TerminalCondition: {
+                return this.isSubtype(exports.Condition, supertype);
+            }
+            case exports.SensorCondition: {
+                return this.isSubtype(exports.TerminalCondition, supertype);
             }
             default: {
                 return false;
@@ -108,14 +131,6 @@ class ArduinoMlAstReflection extends langium_1.AbstractAstReflection {
                     mandatory: [
                         { name: 'bricks', type: 'array' },
                         { name: 'states', type: 'array' }
-                    ]
-                };
-            }
-            case 'Condition': {
-                return {
-                    name: 'Condition',
-                    mandatory: [
-                        { name: 'optionalConditions', type: 'array' }
                     ]
                 };
             }

@@ -13,46 +13,37 @@ long buttonLastDebounceTime = 0;
             
 
 	void setup(){
-		pinMode(12, OUTPUT); // red_led [Actuator]
-		pinMode(13, OUTPUT); // buzzer [Actuator]
-		pinMode(8, INPUT); // button [Sensor]
+		pinMode(8, OUTPUT); // red_led [Actuator]
+		pinMode(9, OUTPUT); // buzzer [Actuator]
+		pinMode(10, INPUT); // button [Sensor]
 	}
 	void loop() {
 			switch(currentState){
 
 				case a:
-					digitalWrite(12,LOW);
-					digitalWrite(13,LOW);
+					digitalWrite(8,LOW);
+					digitalWrite(9,LOW);
                     buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
-                    
-                    if (digitalRead(8) == HIGH && buttonBounceGuard)  {
+                    if (( digitalRead(10) == HIGH  && buttonBounceGuard))  {
                         currentState = b;
                         buttonLastDebounceTime = millis();
-                        
-                    }
-				break;
+                    break;
 				case b:
-					digitalWrite(12,LOW);
-					digitalWrite(13,HIGH);
+					digitalWrite(8,LOW);
+					digitalWrite(9,HIGH);
                     buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
-                    
-                    if (digitalRead(8) == HIGH && buttonBounceGuard)  {
+                    if (( digitalRead(10) == HIGH  && buttonBounceGuard))  {
                         currentState = c;
                         buttonLastDebounceTime = millis();
-                        
-                    }
-				break;
+                    break;
 				case c:
-					digitalWrite(12,HIGH);
-					digitalWrite(13,LOW);
+					digitalWrite(8,HIGH);
+					digitalWrite(9,LOW);
                     buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
-                    
-                    if (digitalRead(8) == HIGH && buttonBounceGuard)  {
+                    if (( digitalRead(10) == HIGH  && buttonBounceGuard))  {
                         currentState = a;
                         buttonLastDebounceTime = millis();
-                        
-                    }
-				break;
+                    break;
 		}
 	}
 	

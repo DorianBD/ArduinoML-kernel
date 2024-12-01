@@ -30,7 +30,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@17"
+                "$ref": "#/rules@21"
               },
               "arguments": []
             }
@@ -55,7 +55,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@17"
+                  "$ref": "#/rules@21"
                 },
                 "arguments": []
               },
@@ -189,7 +189,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@17"
+                "$ref": "#/rules@21"
               },
               "arguments": []
             }
@@ -205,7 +205,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@18"
+                "$ref": "#/rules@22"
               },
               "arguments": []
             }
@@ -243,7 +243,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@17"
+                "$ref": "#/rules@21"
               },
               "arguments": []
             }
@@ -259,7 +259,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@18"
+                "$ref": "#/rules@22"
               },
               "arguments": []
             }
@@ -286,7 +286,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@17"
+                "$ref": "#/rules@21"
               },
               "arguments": []
             }
@@ -363,7 +363,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@17"
+                  "$ref": "#/rules@21"
                 },
                 "arguments": []
               },
@@ -381,7 +381,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@13"
+                "$ref": "#/rules@17"
               },
               "arguments": []
             }
@@ -429,7 +429,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@17"
+                  "$ref": "#/rules@21"
                 },
                 "arguments": []
               },
@@ -449,32 +449,28 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
       "$type": "ParserRule",
       "name": "Condition",
       "definition": {
-        "$type": "Group",
+        "$type": "Alternatives",
         "elements": [
           {
-            "$type": "Assignment",
-            "feature": "mandatoryCondition",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@9"
-              },
-              "arguments": []
-            }
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@8"
+            },
+            "arguments": []
           },
           {
-            "$type": "Assignment",
-            "feature": "optionalConditions",
-            "operator": "+=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@8"
-              },
-              "arguments": []
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@9"
             },
-            "cardinality": "*"
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@10"
+            },
+            "arguments": []
           }
         ]
       },
@@ -487,7 +483,24 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
     },
     {
       "$type": "ParserRule",
-      "name": "SubCondition",
+      "name": "TerminalCondition",
+      "definition": {
+        "$type": "RuleCall",
+        "rule": {
+          "$ref": "#/rules@11"
+        },
+        "arguments": []
+      },
+      "definesHiddenTokens": false,
+      "entry": false,
+      "fragment": false,
+      "hiddenTokens": [],
+      "parameters": [],
+      "wildcard": false
+    },
+    {
+      "$type": "ParserRule",
+      "name": "UnaryCondition",
       "definition": {
         "$type": "Group",
         "elements": [
@@ -498,7 +511,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@10"
+                "$ref": "#/rules@15"
               },
               "arguments": []
             }
@@ -510,10 +523,69 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@9"
+                "$ref": "#/rules@7"
               },
               "arguments": []
             }
+          }
+        ]
+      },
+      "definesHiddenTokens": false,
+      "entry": false,
+      "fragment": false,
+      "hiddenTokens": [],
+      "parameters": [],
+      "wildcard": false
+    },
+    {
+      "$type": "ParserRule",
+      "name": "BinaryCondition",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "("
+          },
+          {
+            "$type": "Assignment",
+            "feature": "left",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@7"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "operator",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@12"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "right",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@7"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": ")"
           }
         ]
       },
@@ -542,7 +614,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@17"
+                  "$ref": "#/rules@21"
                 },
                 "arguments": []
               },
@@ -560,7 +632,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@13"
+                "$ref": "#/rules@17"
               },
               "arguments": []
             }
@@ -576,7 +648,7 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
     },
     {
       "$type": "ParserRule",
-      "name": "LogicalOperator",
+      "name": "BinaryOperator",
       "definition": {
         "$type": "Assignment",
         "feature": "value",
@@ -587,14 +659,14 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
             {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@11"
+                "$ref": "#/rules@13"
               },
               "arguments": []
             },
             {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@12"
+                "$ref": "#/rules@14"
               },
               "arguments": []
             }
@@ -636,6 +708,41 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
     },
     {
       "$type": "ParserRule",
+      "name": "UnaryOperator",
+      "definition": {
+        "$type": "Assignment",
+        "feature": "value",
+        "operator": "=",
+        "terminal": {
+          "$type": "RuleCall",
+          "rule": {
+            "$ref": "#/rules@16"
+          },
+          "arguments": []
+        }
+      },
+      "definesHiddenTokens": false,
+      "entry": false,
+      "fragment": false,
+      "hiddenTokens": [],
+      "parameters": [],
+      "wildcard": false
+    },
+    {
+      "$type": "TerminalRule",
+      "name": "NOT",
+      "definition": {
+        "$type": "CharacterRange",
+        "left": {
+          "$type": "Keyword",
+          "value": "NOT"
+        }
+      },
+      "fragment": false,
+      "hidden": false
+    },
+    {
+      "$type": "ParserRule",
       "name": "Signal",
       "definition": {
         "$type": "Assignment",
@@ -647,14 +754,14 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
             {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@14"
+                "$ref": "#/rules@18"
               },
               "arguments": []
             },
             {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@15"
+                "$ref": "#/rules@19"
               },
               "arguments": []
             }

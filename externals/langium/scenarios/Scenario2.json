@@ -3,35 +3,36 @@
   "author": "Anonymous maker",
   "editor": "wokwi",
   "parts": [
-    { "type": "wokwi-breadboard", "id": "bb1", "top": -127.8, "left": 166, "attrs": {} },
-    { "type": "wokwi-arduino-uno", "id": "uno", "top": -124.2, "left": -125.4, "attrs": {} },
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0.6, "left": -0.6, "attrs": {} },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": -128.4,
+      "left": 90.2,
+      "attrs": { "color": "red" }
+    },
     {
       "type": "wokwi-pushbutton",
       "id": "btn1",
-      "top": -272.2,
-      "left": 211.2,
-      "attrs": { "color": "green" }
+      "top": -118.6,
+      "left": 278.4,
+      "attrs": { "color": "green", "bounce": "0" }
     },
     {
       "type": "wokwi-pushbutton",
       "id": "btn2",
-      "top": -253,
-      "left": 355.2,
-      "attrs": { "color": "green" }
-    },
-    { "type": "wokwi-led", "id": "led1", "top": -234, "left": -44.2, "attrs": { "color": "red" } }
+      "top": -118.6,
+      "left": 163.2,
+      "attrs": { "color": "green", "bounce": "0" }
+    }
   ],
   "connections": [
-    [ "uno:GND.1", "bb1:tn.1", "black", [ "v-28.8", "h221.1" ] ],
-    [ "btn1:2.r", "bb1:tn.2", "green", [ "h29", "v38.6", "h-96" ] ],
-    [ "uno:5V", "bb1:tp.1", "red", [ "v19.1", "h119", "v-201.6" ] ],
-    [ "btn1:1.r", "bb1:tp.3", "green", [ "v0", "h38.6", "v67.2", "h-96" ] ],
-    [ "btn2:2.r", "bb1:tn.12", "green", [ "h19.4", "v29", "h-96" ] ],
-    [ "btn2:1.r", "bb1:tp.14", "green", [ "v0", "h29", "v57.6", "h-105.6" ] ],
-    [ "led1:A", "uno:13", "green", [ "v19.2", "h19.2" ] ],
-    [ "led1:C", "uno:GND.1", "green", [ "v57.6", "h19.6" ] ],
-    [ "btn2:2.l", "uno:8", "green", [ "h-307.2", "v0.2" ] ],
-    [ "btn1:2.l", "uno:7", "green", [ "h0" ] ]
+    [ "uno:7", "led1:A", "green", [ "v-66.6", "h-83.4" ] ],
+    [ "led1:C", "uno:GND.1", "green", [ "v67.2", "h10" ] ],
+    [ "btn2:2.r", "uno:3", "green", [ "h0" ] ],
+    [ "btn2:1.r", "uno:GND.1", "green", [ "v-28.8", "h-95.8", "v124.8", "h-19.2", "v19.2" ] ],
+    [ "btn1:1.l", "uno:GND.1", "green", [ "h0" ] ],
+    [ "btn2:2.r", "uno:2", "green", [ "h0" ] ]
   ],
   "dependencies": {}
 }

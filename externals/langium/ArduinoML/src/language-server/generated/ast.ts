@@ -14,6 +14,22 @@ export function isBrick(item: unknown): item is Brick {
     return reflection.isInstance(item, Brick);
 }
 
+export type Condition = BinaryCondition | TerminalCondition | UnaryCondition;
+
+export const Condition = 'Condition';
+
+export function isCondition(item: unknown): item is Condition {
+    return reflection.isInstance(item, Condition);
+}
+
+export type TerminalCondition = SensorCondition;
+
+export const TerminalCondition = 'TerminalCondition';
+
+export function isTerminalCondition(item: unknown): item is TerminalCondition {
+    return reflection.isInstance(item, TerminalCondition);
+}
+
 export interface Action extends AstNode {
     readonly $container: State;
     readonly $type: 'Action';
@@ -54,29 +70,30 @@ export function isApp(item: unknown): item is App {
     return reflection.isInstance(item, App);
 }
 
-export interface Condition extends AstNode {
-    readonly $container: Transition;
-    readonly $type: 'Condition';
-    mandatoryCondition: SensorCondition
-    optionalConditions: Array<SubCondition>
+export interface BinaryCondition extends AstNode {
+    readonly $container: BinaryCondition | Transition | UnaryCondition;
+    readonly $type: 'BinaryCondition';
+    left: Condition
+    operator: BinaryOperator
+    right: Condition
 }
 
-export const Condition = 'Condition';
+export const BinaryCondition = 'BinaryCondition';
 
-export function isCondition(item: unknown): item is Condition {
-    return reflection.isInstance(item, Condition);
+export function isBinaryCondition(item: unknown): item is BinaryCondition {
+    return reflection.isInstance(item, BinaryCondition);
 }
 
-export interface LogicalOperator extends AstNode {
-    readonly $container: SubCondition;
-    readonly $type: 'LogicalOperator';
+export interface BinaryOperator extends AstNode {
+    readonly $container: BinaryCondition;
+    readonly $type: 'BinaryOperator';
     value: string
 }
 
-export const LogicalOperator = 'LogicalOperator';
+export const BinaryOperator = 'BinaryOperator';
 
-export function isLogicalOperator(item: unknown): item is LogicalOperator {
-    return reflection.isInstance(item, LogicalOperator);
+export function isBinaryOperator(item: unknown): item is BinaryOperator {
+    return reflection.isInstance(item, BinaryOperator);
 }
 
 export interface Sensor extends AstNode {
@@ -93,7 +110,7 @@ export function isSensor(item: unknown): item is Sensor {
 }
 
 export interface SensorCondition extends AstNode {
-    readonly $container: Condition | SubCondition;
+    readonly $container: BinaryCondition | Transition | UnaryCondition;
     readonly $type: 'SensorCondition';
     sensor: Reference<Sensor>
     value: Signal
@@ -131,19 +148,6 @@ export function isState(item: unknown): item is State {
     return reflection.isInstance(item, State);
 }
 
-export interface SubCondition extends AstNode {
-    readonly $container: Condition;
-    readonly $type: 'SubCondition';
-    condition: SensorCondition
-    operator: LogicalOperator
-}
-
-export const SubCondition = 'SubCondition';
-
-export function isSubCondition(item: unknown): item is SubCondition {
-    return reflection.isInstance(item, SubCondition);
-}
-
 export interface Transition extends AstNode {
     readonly $container: State;
     readonly $type: 'Transition';
@@ -157,25 +161,53 @@ export function isTransition(item: unknown): item is Transition {
     return reflection.isInstance(item, Transition);
 }
 
+export interface UnaryCondition extends AstNode {
+    readonly $container: BinaryCondition | Transition | UnaryCondition;
+    readonly $type: 'UnaryCondition';
+    condition: Condition
+    operator: UnaryOperator
+}
+
+export const UnaryCondition = 'UnaryCondition';
+
+export function isUnaryCondition(item: unknown): item is UnaryCondition {
+    return reflection.isInstance(item, UnaryCondition);
+}
+
+export interface UnaryOperator extends AstNode {
+    readonly $container: UnaryCondition;
+    readonly $type: 'UnaryOperator';
+    value: string
+}
+
+export const UnaryOperator = 'UnaryOperator';
+
+export function isUnaryOperator(item: unknown): item is UnaryOperator {
+    return reflection.isInstance(item, UnaryOperator);
+}
+
 export interface ArduinoMlAstType {
     Action: Action
     Actuator: Actuator
     App: App
+    BinaryCondition: BinaryCondition
+    BinaryOperator: BinaryOperator
     Brick: Brick
     Condition: Condition
-    LogicalOperator: LogicalOperator
     Sensor: Sensor
     SensorCondition: SensorCondition
     Signal: Signal
     State: State
-    SubCondition: SubCondition
+    TerminalCondition: TerminalCondition
     Transition: Transition
+    UnaryCondition: UnaryCondition
+    UnaryOperator: UnaryOperator
 }
 
 export class ArduinoMlAstReflection extends AbstractAstReflection {
 
     getAllTypes(): string[] {
-        return ['Action', 'Actuator', 'App', 'Brick', 'Condition', 'LogicalOperator', 'Sensor', 'SensorCondition', 'Signal', 'State', 'SubCondition', 'Transition'];
+        return ['Action', 'Actuator', 'App', 'BinaryCondition', 'BinaryOperator', 'Brick', 'Condition', 'Sensor', 'SensorCondition', 'Signal', 'State', 'TerminalCondition', 'Transition', 'UnaryCondition', 'UnaryOperator'];
     }
 
     protected override computeIsSubtype(subtype: string, supertype: string): boolean {
@@ -183,6 +215,14 @@ export class ArduinoMlAstReflection extends AbstractAstReflection {
             case Actuator:
             case Sensor: {
                 return this.isSubtype(Brick, supertype);
+            }
+            case BinaryCondition:
+            case UnaryCondition:
+            case TerminalCondition: {
+                return this.isSubtype(Condition, supertype);
+            }
+            case SensorCondition: {
+                return this.isSubtype(TerminalCondition, supertype);
             }
             default: {
                 return false;
@@ -217,14 +257,6 @@ export class ArduinoMlAstReflection extends AbstractAstReflection {
                     mandatory: [
                         { name: 'bricks', type: 'array' },
                         { name: 'states', type: 'array' }
-                    ]
-                };
-            }
-            case 'Condition': {
-                return {
-                    name: 'Condition',
-                    mandatory: [
-                        { name: 'optionalConditions', type: 'array' }
                     ]
                 };
             }

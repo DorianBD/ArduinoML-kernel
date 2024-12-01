@@ -26,7 +26,7 @@ Sensor :
 State :
 	name=ID '{'
 		actions+=Action
-		(actions+=Action)* 
+		(actions+=Action)*
 		transition=Transition
 	'}';
 
@@ -38,19 +38,28 @@ Transition :
 	condition=Condition '=>' next=[State:ID];
 
 Condition :
-    mandatoryCondition=SensorCondition
-    (optionalConditions+=SubCondition)*;
+    (TerminalCondition | UnaryCondition | BinaryCondition);
 
-SubCondition:
-    operator=LogicalOperator condition=SensorCondition;
+TerminalCondition :
+    (SensorCondition);
+
+UnaryCondition :
+    operator=UnaryOperator condition=Condition;
+
+BinaryCondition :
+    '(' left=Condition operator=BinaryOperator right=Condition ')';
 
 SensorCondition:
     sensor=[Sensor:ID] 'is' value=Signal;
 
-LogicalOperator:
+BinaryOperator:
     value=(AND | OR);
 terminal AND: 'AND';
 terminal OR: 'OR';
+
+UnaryOperator:
+    value=NOT;
+terminal NOT: 'NOT';
 
 Signal:
     value=(HIGH | LOW);

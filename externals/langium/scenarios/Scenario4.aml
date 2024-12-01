@@ -1,9 +1,9 @@
 app RedButton initial state a {
 	bricks
-		Actuator red_led : 12
-		Actuator buzzer : 13
+		Actuator red_led : 8
+		Actuator buzzer : 9
 
-		Sensor button : 8
+		Sensor button : 10
 
 	states
 		a {

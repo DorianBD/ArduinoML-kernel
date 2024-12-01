@@ -18,37 +18,31 @@ long button2LastDebounceTime = 0;
             
 
 	void setup(){
-		pinMode(13, OUTPUT); // buzzer [Actuator]
-		pinMode(8, INPUT); // button1 [Sensor]
-		pinMode(7, INPUT); // button2 [Sensor]
+		pinMode(9, OUTPUT); // buzzer [Actuator]
+		pinMode(10, INPUT); // button1 [Sensor]
+		pinMode(11, INPUT); // button2 [Sensor]
 	}
 	void loop() {
-			switch(currentState){
+            switch(currentState){
 
 				case off:
-					digitalWrite(13,LOW);
+					digitalWrite(9,LOW);
                     button1BounceGuard = millis() - button1LastDebounceTime > debounce;
                     button2BounceGuard = millis() - button2LastDebounceTime > debounce;
-            
-                    if (digitalRead(8) == HIGH && button1BounceGuard
-                        && ( digitalRead(7) == HIGH && button2BounceGuard))  {
+                    if ((( digitalRead(10) == HIGH  && button1BounceGuard) && ( digitalRead(11) == HIGH  && button2BounceGuard)))  {
                         currentState = on;
                         button1LastDebounceTime = millis();
-                        button2LastDebounceTime = millis(); 
-                    }
-				break;
+                        button2LastDebounceTime = millis();
+                    break;
 				case on:
-					digitalWrite(13,HIGH);
+					digitalWrite(9,HIGH);
                     button1BounceGuard = millis() - button1LastDebounceTime > debounce;
                     button2BounceGuard = millis() - button2LastDebounceTime > debounce;
-            
-                    if (digitalRead(8) == HIGH && button1BounceGuard
-                        && ( digitalRead(7) == HIGH && button2BounceGuard))  {
+                    if ((! (( digitalRead(10) == LOW  && button1BounceGuard) || ( digitalRead(11) == LOW  && button2BounceGuard))))  {
                         currentState = off;
                         button1LastDebounceTime = millis();
-                        button2LastDebounceTime = millis(); 
-                    }
-				break;
+                        button2LastDebounceTime = millis();
+                    break;
 		}
 	}
 	

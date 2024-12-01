@@ -41,7 +41,7 @@ Condition :
     (TerminalCondition | UnaryCondition | BinaryCondition);
 
 TerminalCondition :
-    (SensorCondition);
+    (SensorCondition | TemporalCondition);
 
 UnaryCondition :
     operator=UnaryOperator condition=Condition;
@@ -51,6 +51,9 @@ BinaryCondition :
 
 SensorCondition:
     sensor=[Sensor:ID] 'is' value=Signal;
+
+TemporalCondition:
+    'after' duration=INT;
 
 BinaryOperator:
     value=(AND | OR);

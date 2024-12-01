@@ -114,25 +114,38 @@ function getSensors(condition) {
             return [...getSensors(condition.condition)];
         case "BinaryCondition":
             return [...getSensors(condition.left), ...getSensors(condition.right)];
+        case "TemporalCondition":
+            return [];
     }
 }
 function compileCondition(condition, fileNode) {
     switch (condition.$type) {
-        case "SensorCondition":
-            compileSensorCondition(condition, fileNode);
-            break;
         case "BinaryCondition":
             compileBinaryCondition(condition, fileNode);
             break;
         case "UnaryCondition":
             compileUnaryCondition(condition, fileNode);
             break;
+        default:
+            compileTerminalCondition(condition, fileNode);
+    }
+}
+function compileTerminalCondition(condition, fileNode) {
+    switch (condition.$type) {
+        case "SensorCondition":
+            compileSensorCondition(condition, fileNode);
+            break;
+        case "TemporalCondition":
+            compileTemporalCondition(condition, fileNode);
+            break;
     }
 }
 function compileSensorCondition(sensorCondition, fileNode) {
     var _a, _b;
-    //the bounce
     fileNode.append(`( digitalRead(` + ((_a = sensorCondition.sensor.ref) === null || _a === void 0 ? void 0 : _a.inputPin) + `) == ` + sensorCondition.value.value + `  && ` + ((_b = sensorCondition.sensor.ref) === null || _b === void 0 ? void 0 : _b.name) + `BounceGuard)`);
+}
+function compileTemporalCondition(temporalCondition, fileNode) {
+    fileNode.append(`(millis() - startTime >= ` + temporalCondition.duration + `)`);
 }
 function compileUnaryCondition(unaryCondition, fileNode) {
     fileNode.append(`(` + getOperator(unaryCondition.operator.value) + ` `);

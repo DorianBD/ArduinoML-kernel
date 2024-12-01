@@ -22,7 +22,7 @@ export function isCondition(item: unknown): item is Condition {
     return reflection.isInstance(item, Condition);
 }
 
-export type TerminalCondition = SensorCondition;
+export type TerminalCondition = SensorCondition | TemporalCondition;
 
 export const TerminalCondition = 'TerminalCondition';
 
@@ -148,6 +148,18 @@ export function isState(item: unknown): item is State {
     return reflection.isInstance(item, State);
 }
 
+export interface TemporalCondition extends AstNode {
+    readonly $container: BinaryCondition | Transition | UnaryCondition;
+    readonly $type: 'TemporalCondition';
+    duration: number
+}
+
+export const TemporalCondition = 'TemporalCondition';
+
+export function isTemporalCondition(item: unknown): item is TemporalCondition {
+    return reflection.isInstance(item, TemporalCondition);
+}
+
 export interface Transition extends AstNode {
     readonly $container: State;
     readonly $type: 'Transition';
@@ -198,6 +210,7 @@ export interface ArduinoMlAstType {
     SensorCondition: SensorCondition
     Signal: Signal
     State: State
+    TemporalCondition: TemporalCondition
     TerminalCondition: TerminalCondition
     Transition: Transition
     UnaryCondition: UnaryCondition
@@ -207,7 +220,7 @@ export interface ArduinoMlAstType {
 export class ArduinoMlAstReflection extends AbstractAstReflection {
 
     getAllTypes(): string[] {
-        return ['Action', 'Actuator', 'App', 'BinaryCondition', 'BinaryOperator', 'Brick', 'Condition', 'Sensor', 'SensorCondition', 'Signal', 'State', 'TerminalCondition', 'Transition', 'UnaryCondition', 'UnaryOperator'];
+        return ['Action', 'Actuator', 'App', 'BinaryCondition', 'BinaryOperator', 'Brick', 'Condition', 'Sensor', 'SensorCondition', 'Signal', 'State', 'TemporalCondition', 'TerminalCondition', 'Transition', 'UnaryCondition', 'UnaryOperator'];
     }
 
     protected override computeIsSubtype(subtype: string, supertype: string): boolean {
@@ -221,7 +234,8 @@ export class ArduinoMlAstReflection extends AbstractAstReflection {
             case TerminalCondition: {
                 return this.isSubtype(Condition, supertype);
             }
-            case SensorCondition: {
+            case SensorCondition:
+            case TemporalCondition: {
                 return this.isSubtype(TerminalCondition, supertype);
             }
             default: {

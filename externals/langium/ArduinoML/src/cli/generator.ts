@@ -10,6 +10,7 @@ import {
     Sensor,
     SensorCondition,
     State,
+    TemporalCondition,
     Transition,
     UnaryCondition
 } from '../language-server/generated/ast';
@@ -136,27 +137,42 @@ function getSensors(condition: Condition): Sensor[] {
             return [...getSensors(condition.condition)];
         case "BinaryCondition" :
             return [...getSensors(condition.left), ...getSensors(condition.right)];
+        case "TemporalCondition":
+            return [];
     }
 }
 
 function compileCondition(condition: Condition, fileNode: CompositeGeneratorNode) {
     switch (condition.$type) {
-        case "SensorCondition" :
-            compileSensorCondition(condition, fileNode);
-            break;
+
         case "BinaryCondition":
             compileBinaryCondition(condition, fileNode);
             break;
         case "UnaryCondition":
             compileUnaryCondition(condition, fileNode);
             break;
+        default:
+            compileTerminalCondition(condition, fileNode);
+    }
+}
 
+function compileTerminalCondition(condition: Condition, fileNode: CompositeGeneratorNode) {
+    switch (condition.$type) {
+        case "SensorCondition":
+            compileSensorCondition(condition, fileNode);
+            break;
+        case "TemporalCondition":
+            compileTemporalCondition(condition, fileNode);
+            break;
     }
 }
 
 function compileSensorCondition(sensorCondition: SensorCondition, fileNode: CompositeGeneratorNode) {
-    //the bounce
     fileNode.append(`( digitalRead(` + sensorCondition.sensor.ref?.inputPin + `) == ` + sensorCondition.value.value + `  && ` + sensorCondition.sensor.ref?.name + `BounceGuard)`);
+}
+
+function compileTemporalCondition(temporalCondition: TemporalCondition, fileNode: CompositeGeneratorNode) {
+    fileNode.append(`(millis() - startTime >= ` + temporalCondition.duration + `)`);
 }
 
 function compileUnaryCondition(unaryCondition: UnaryCondition, fileNode: CompositeGeneratorNode) {

@@ -29,7 +29,7 @@ long button2LastDebounceTime = 0;
 					digitalWrite(9,LOW);
                     button1BounceGuard = millis() - button1LastDebounceTime > debounce;
                     button2BounceGuard = millis() - button2LastDebounceTime > debounce;
-                    if ((( digitalRead(10) == HIGH  && button1BounceGuard) && ( digitalRead(11) == HIGH  && button2BounceGuard)))  {
+                    if (((millis() - startTime >= 200) && (( digitalRead(10) == HIGH  && button1BounceGuard) && ( digitalRead(11) == HIGH  && button2BounceGuard))))  {
                         currentState = on;
                         button1LastDebounceTime = millis();
                         button2LastDebounceTime = millis();

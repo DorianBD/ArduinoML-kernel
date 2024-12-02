@@ -39,6 +39,7 @@ long ` + brick.name + `LastDebounceTime = 0;
             `, langium_1.NL);
         }
     }
+    fileNode.append(`long startTime = millis();`, langium_1.NL);
     fileNode.append(`
 	void setup(){`);
     for (const brick of app.bricks) {
@@ -99,10 +100,14 @@ function compileTransition(transition, fileNode) {
     fileNode.append(`)  {`);
     fileNode.append(`
                         currentState = ` + ((_a = transition.next.ref) === null || _a === void 0 ? void 0 : _a.name) + `;`);
+    fileNode.append(`
+                        startTime = millis();`);
     for (const sensor of sensors) {
         fileNode.append(`
                         ` + sensor.name + `LastDebounceTime = millis();`);
     }
+    fileNode.append(`
+                    }`);
 }
 function getSensors(condition) {
     switch (condition.$type) {
@@ -126,12 +131,6 @@ function compileCondition(condition, fileNode) {
         case "UnaryCondition":
             compileUnaryCondition(condition, fileNode);
             break;
-        default:
-            compileTerminalCondition(condition, fileNode);
-    }
-}
-function compileTerminalCondition(condition, fileNode) {
-    switch (condition.$type) {
         case "SensorCondition":
             compileSensorCondition(condition, fileNode);
             break;

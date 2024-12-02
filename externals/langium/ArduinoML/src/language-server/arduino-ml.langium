@@ -38,10 +38,8 @@ Transition :
 	condition=Condition '=>' next=[State:ID];
 
 Condition :
-    (TerminalCondition | UnaryCondition | BinaryCondition);
+    (SensorCondition | TemporalCondition | UnaryCondition | BinaryCondition);
 
-TerminalCondition :
-    (SensorCondition | TemporalCondition);
 
 UnaryCondition :
     operator=UnaryOperator condition=Condition;

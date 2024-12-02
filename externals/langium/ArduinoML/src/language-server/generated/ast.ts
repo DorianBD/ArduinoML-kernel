@@ -14,20 +14,12 @@ export function isBrick(item: unknown): item is Brick {
     return reflection.isInstance(item, Brick);
 }
 
-export type Condition = BinaryCondition | TerminalCondition | UnaryCondition;
+export type Condition = BinaryCondition | SensorCondition | TemporalCondition | UnaryCondition;
 
 export const Condition = 'Condition';
 
 export function isCondition(item: unknown): item is Condition {
     return reflection.isInstance(item, Condition);
-}
-
-export type TerminalCondition = SensorCondition | TemporalCondition;
-
-export const TerminalCondition = 'TerminalCondition';
-
-export function isTerminalCondition(item: unknown): item is TerminalCondition {
-    return reflection.isInstance(item, TerminalCondition);
 }
 
 export interface Action extends AstNode {
@@ -211,7 +203,6 @@ export interface ArduinoMlAstType {
     Signal: Signal
     State: State
     TemporalCondition: TemporalCondition
-    TerminalCondition: TerminalCondition
     Transition: Transition
     UnaryCondition: UnaryCondition
     UnaryOperator: UnaryOperator
@@ -220,7 +211,7 @@ export interface ArduinoMlAstType {
 export class ArduinoMlAstReflection extends AbstractAstReflection {
 
     getAllTypes(): string[] {
-        return ['Action', 'Actuator', 'App', 'BinaryCondition', 'BinaryOperator', 'Brick', 'Condition', 'Sensor', 'SensorCondition', 'Signal', 'State', 'TemporalCondition', 'TerminalCondition', 'Transition', 'UnaryCondition', 'UnaryOperator'];
+        return ['Action', 'Actuator', 'App', 'BinaryCondition', 'BinaryOperator', 'Brick', 'Condition', 'Sensor', 'SensorCondition', 'Signal', 'State', 'TemporalCondition', 'Transition', 'UnaryCondition', 'UnaryOperator'];
     }
 
     protected override computeIsSubtype(subtype: string, supertype: string): boolean {
@@ -230,13 +221,10 @@ export class ArduinoMlAstReflection extends AbstractAstReflection {
                 return this.isSubtype(Brick, supertype);
             }
             case BinaryCondition:
-            case UnaryCondition:
-            case TerminalCondition: {
-                return this.isSubtype(Condition, supertype);
-            }
             case SensorCondition:
-            case TemporalCondition: {
-                return this.isSubtype(TerminalCondition, supertype);
+            case TemporalCondition:
+            case UnaryCondition: {
+                return this.isSubtype(Condition, supertype);
             }
             default: {
                 return false;

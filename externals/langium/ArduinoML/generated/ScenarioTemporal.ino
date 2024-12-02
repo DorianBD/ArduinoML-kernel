@@ -16,11 +16,12 @@ bool button2BounceGuard = false;
 long button2LastDebounceTime = 0;
 
             
+long startTime = millis();
 
 	void setup(){
 		pinMode(9, OUTPUT); // buzzer [Actuator]
-		pinMode(10, INPUT); // button1 [Sensor]
-		pinMode(11, INPUT); // button2 [Sensor]
+		pinMode(11, INPUT); // button1 [Sensor]
+		pinMode(12, INPUT); // button2 [Sensor]
 	}
 	void loop() {
 			switch(currentState){
@@ -29,19 +30,23 @@ long button2LastDebounceTime = 0;
 					digitalWrite(9,LOW);
                     button1BounceGuard = millis() - button1LastDebounceTime > debounce;
                     button2BounceGuard = millis() - button2LastDebounceTime > debounce;
-                    if (((millis() - startTime >= 200) && (( digitalRead(10) == HIGH  && button1BounceGuard) && ( digitalRead(11) == HIGH  && button2BounceGuard))))  {
+                    if (((millis() - startTime >= 4000) && (( digitalRead(11) == HIGH  && button1BounceGuard) && ( digitalRead(12) == HIGH  && button2BounceGuard))))  {
                         currentState = on;
+                        startTime = millis();
                         button1LastDebounceTime = millis();
                         button2LastDebounceTime = millis();
+                    }
                     break;
 				case on:
 					digitalWrite(9,HIGH);
                     button1BounceGuard = millis() - button1LastDebounceTime > debounce;
                     button2BounceGuard = millis() - button2LastDebounceTime > debounce;
-                    if ((! (( digitalRead(10) == LOW  && button1BounceGuard) || ( digitalRead(11) == LOW  && button2BounceGuard))))  {
+                    if ((( digitalRead(11) == LOW  && button1BounceGuard) || ( digitalRead(12) == LOW  && button2BounceGuard)))  {
                         currentState = off;
+                        startTime = millis();
                         button1LastDebounceTime = millis();
                         button2LastDebounceTime = millis();
+                    }
                     break;
 		}
 	}

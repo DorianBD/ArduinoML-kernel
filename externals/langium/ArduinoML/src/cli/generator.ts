@@ -53,6 +53,7 @@ long ` + brick.name + `LastDebounceTime = 0;
             `, NL);
         }
     }
+    fileNode.append(`long startTime = millis();`, NL);
     fileNode.append(`
 	void setup(){`);
     for (const brick of app.bricks) {
@@ -121,10 +122,14 @@ function compileTransition(transition: Transition, fileNode: CompositeGeneratorN
     fileNode.append(`)  {`);
     fileNode.append(`
                         currentState = ` + transition.next.ref?.name + `;`);
+    fileNode.append(`
+                        startTime = millis();`);
     for (const sensor of sensors) {
         fileNode.append(`
                         ` + sensor.name + `LastDebounceTime = millis();`);
     }
+    fileNode.append(`
+                    }`);
 
 }
 
@@ -151,13 +156,6 @@ function compileCondition(condition: Condition, fileNode: CompositeGeneratorNode
         case "UnaryCondition":
             compileUnaryCondition(condition, fileNode);
             break;
-        default:
-            compileTerminalCondition(condition, fileNode);
-    }
-}
-
-function compileTerminalCondition(condition: Condition, fileNode: CompositeGeneratorNode) {
-    switch (condition.$type) {
         case "SensorCondition":
             compileSensorCondition(condition, fileNode);
             break;

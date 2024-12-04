@@ -1,4 +1,4 @@
-package main.groovy.groovuinoml.main;
+package groovuinoml.main;
 
 import java.io.File;
 

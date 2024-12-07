@@ -15,7 +15,6 @@ function registerValidationChecks(services) {
             validator.checkUnaryConditionNotTemporalCondition
         ],
         BinaryCondition: [
-            // validator.checkBinaryConditionTemporalConditions,
             validator.checkBinaryConditionComplexity
         ]
     };
@@ -38,15 +37,6 @@ class ArduinoMlValidator {
     checkUnaryConditionNotTemporalCondition(condition, accept) {
         if (condition.condition.$type === 'TemporalCondition') {
             accept('error', 'UnaryCondition cannot be directly composed of a TemporalCondition.', { node: condition });
-        }
-    }
-    // A BinaryCondition can't have 2 TemporalConditions with an AND
-    checkBinaryConditionTemporalConditions(condition, accept) {
-        const isLeftTemporal = condition.left.$type === 'TemporalCondition';
-        const isRightTemporal = condition.right.$type === 'TemporalCondition';
-        const isAndOperator = condition.operator.value === 'AND';
-        if (isLeftTemporal && isRightTemporal && isAndOperator) {
-            accept('error', 'BinaryCondition cannot combine two TemporalConditions with AND.', { node: condition });
         }
     }
     // Validate complex conditions to prevent combining multiple temporal conditions incorrectly

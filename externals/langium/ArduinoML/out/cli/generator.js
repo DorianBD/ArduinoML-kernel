@@ -30,8 +30,8 @@ long debounce = 200;
 enum STATE {` + app.states.map(s => s.name).join(', ') + `};
 
 STATE currentState = ` + ((_a = app.initial.ref) === null || _a === void 0 ? void 0 : _a.name) + `;`, langium_1.NL);
-    const EXCEPTION_HIGH_DURATION = 600;
-    const EXCEPTION_LOW_DURATION = 200;
+    const EXCEPTION_HIGH_DURATION = 400;
+    const EXCEPTION_LOW_DURATION = 100;
     const EXCEPTION_IDLE_DURATION = 1200;
     const EXCEPTION_LED_PIN = 12;
     for (const brick of app.bricks) {
@@ -110,7 +110,6 @@ function compileState(state, fileNode, tabNumber = 0) {
         newLine(fileNode);
         compileTransition(transition, fileNode, tabNumber + 1);
     }
-
     fileNode.append(getTabString(tabNumber + 1) + `break;`, langium_1.NL);
     newLine(fileNode);
 }

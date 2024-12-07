@@ -4,6 +4,10 @@ import io.github.mosser.arduinoml.kernel.App;
 import io.github.mosser.arduinoml.kernel.behavioral.*;
 import io.github.mosser.arduinoml.kernel.structural.*;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Quick and dirty visitor to support the generation of Wiring code
  */
@@ -43,6 +47,8 @@ public class ToWiring extends Visitor<StringBuffer> {
 			brick.accept(this);
 		}
 
+		w("\nlong startTime = millis();\n");
+
 		//second pass, setup and loop
 		context.put("pass",PASS.TWO);
 		w("\nvoid setup(){\n");
@@ -71,7 +77,6 @@ public class ToWiring extends Visitor<StringBuffer> {
 		}
 	}
 
-
 	@Override
 	public void visit(Sensor sensor) {
 		if(context.get("pass") == PASS.ONE) {
@@ -97,8 +102,10 @@ public class ToWiring extends Visitor<StringBuffer> {
 				action.accept(this);
 			}
 
-			if (state.getTransition() != null) {
-				state.getTransition().accept(this);
+			if (!state.getTransitions().isEmpty()) {
+				for(Transition transition : state.getTransitions()) {
+					transition.accept(this);
+				}
 				w("\t\tbreak;\n");
 			}
 			return;
@@ -107,33 +114,111 @@ public class ToWiring extends Visitor<StringBuffer> {
 	}
 
 	@Override
-	public void visit(SignalTransition transition) {
+	public void visit(Transition transition) {
 		if(context.get("pass") == PASS.ONE) {
 			return;
 		}
 		if(context.get("pass") == PASS.TWO) {
-			String sensorName = transition.getSensor().getName();
+			Set<Sensor> sensors = getSensors(transition.getCondition());
+			for (Sensor sensor : sensors) {
+				String name = sensor.getName();
+				w(String.format("\t\t\t%sBounceGuard = millis() - %sLastDebounceTime > debounce;\n",
+						name, name));
+			}
+			w(String.format("\t\t\tif("));
+			transition.getCondition().accept(this);
+			w(") {\n");
+			w("\t\t\t\tstartTime = millis();\n");
+			for(Sensor sensor : sensors) {
+				String name = sensor.getName();
+				w(String.format("\t\t\t\t%sLastDebounceTime = millis();\n", name));
+			}
+			w("\t\t\t\tcurrentState = " + transition.getNext().getName() + ";\n");
+			w("\t\t\t\tbreak;\n");
+			w("\t\t\t}\n");
+
+			/*String sensorName = transition.getSensor().getName();
 			w(String.format("\t\t\t%sBounceGuard = millis() - %sLastDebounceTime > debounce;\n",
 					sensorName, sensorName));
 			w(String.format("\t\t\tif( digitalRead(%d) == %s && %sBounceGuard) {\n",
 					transition.getSensor().getPin(), transition.getValue(), sensorName));
 			w(String.format("\t\t\t\t%sLastDebounceTime = millis();\n", sensorName));
 			w("\t\t\t\tcurrentState = " + transition.getNext().getName() + ";\n");
-			w("\t\t\t}\n");
+			w("\t\t\t}\n");*/
 			return;
 		}
 	}
 
 	@Override
-	public void visit(TimeTransition transition) {
+	public void visit(SensorCondition condition) {
 		if(context.get("pass") == PASS.ONE) {
 			return;
 		}
 		if(context.get("pass") == PASS.TWO) {
-			int delayInMS = transition.getDelay();
-			w(String.format("\t\t\tdelay(%d);\n", delayInMS));
-			w("\t\t\t\tcurrentState = " + transition.getNext().getName() + ";\n");
-			w("\t\t\t}\n");
+			w(String.format("digitalRead(%d) == %s", condition.getSensor().getPin(), condition.getValue()));
+			return;
+		}
+	}
+
+	@Override
+	public void visit(TemporalCondition condition) {
+		if(context.get("pass") == PASS.ONE) {
+			return;
+		}
+		if(context.get("pass") == PASS.TWO) {
+			int time = condition.getDuration();
+			w(String.format("(millis() - startTime) >= %d", time));
+			return;
+		}
+	}
+
+	@Override
+	public void visit(BinaryCondition condition) {
+		if(context.get("pass") == PASS.ONE) {
+			return;
+		}
+		if(context.get("pass") == PASS.TWO) {
+			condition.getLeft().accept(this);
+			w(" ");
+			condition.getOperator().accept(this);
+			w(" ");
+			condition.getRight().accept(this);
+			return;
+		}
+	}
+
+	@Override
+	public void visit(UnaryCondition condition) {
+		if(context.get("pass") == PASS.ONE) {
+			return;
+		}
+		if(context.get("pass") == PASS.TWO) {
+			w(String.format("%s", condition.getOperator()));
+			w("(");
+			condition.getCondition().accept(this);
+			w(")");
+			return;
+		}
+	}
+
+	@Override
+	public void visit(UnaryOperator operator) {
+		if(context.get("pass") == PASS.ONE) {
+			return;
+		}
+		if(context.get("pass") == PASS.TWO) {
+			w(operator.getOperator());
+			return;
+		}
+	}
+
+	@Override
+	public void visit(BinaryOperator operator) {
+		if(context.get("pass") == PASS.ONE) {
+			return;
+		}
+		if(context.get("pass") == PASS.TWO) {
+			w(operator.getOperator());
 			return;
 		}
 	}
@@ -149,4 +234,31 @@ public class ToWiring extends Visitor<StringBuffer> {
 		}
 	}
 
+
+	private Set<Sensor> getSensors(Condition condition) {
+		if (condition.getClass().equals(SensorCondition.class))
+		{
+			Set sensor = new HashSet<Sensor>();
+			sensor.add(((SensorCondition) condition).getSensor());
+			return sensor;
+		}
+		else if (condition.getClass().equals(UnaryCondition.class))
+		{
+			return getSensors(((UnaryCondition) condition).getCondition());
+		}
+		else if (condition.getClass().equals(BinaryCondition.class))
+		{
+			Set<Sensor> sens = getSensors(((BinaryCondition) condition).getLeft());
+			Set<Sensor> sensRight = getSensors(((BinaryCondition) condition).getRight());
+			sens.addAll(sensRight);
+			return sens;
+		}
+		else if (condition.getClass().equals(TemporalCondition.class))
+		{
+			return Set.of();
+		}
+		else {
+			return Set.of();
+		}
+	}
 }

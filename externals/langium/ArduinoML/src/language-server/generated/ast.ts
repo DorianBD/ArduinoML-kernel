@@ -51,6 +51,7 @@ export function isActuator(item: unknown): item is Actuator {
 export interface App extends AstNode {
     readonly $type: 'App';
     bricks: Array<Brick>
+    exceptions: Array<Exception>
     initial: Reference<State>
     name: string
     states: Array<State>
@@ -63,7 +64,7 @@ export function isApp(item: unknown): item is App {
 }
 
 export interface BinaryCondition extends AstNode {
-    readonly $container: BinaryCondition | Transition | UnaryCondition;
+    readonly $container: BinaryCondition | Exception | Transition | UnaryCondition;
     readonly $type: 'BinaryCondition';
     left: Condition
     operator: BinaryOperator
@@ -88,6 +89,19 @@ export function isBinaryOperator(item: unknown): item is BinaryOperator {
     return reflection.isInstance(item, BinaryOperator);
 }
 
+export interface Exception extends AstNode {
+    readonly $container: App;
+    readonly $type: 'Exception';
+    condition: Condition
+    value: number
+}
+
+export const Exception = 'Exception';
+
+export function isException(item: unknown): item is Exception {
+    return reflection.isInstance(item, Exception);
+}
+
 export interface Sensor extends AstNode {
     readonly $container: App;
     readonly $type: 'Sensor';
@@ -102,7 +116,7 @@ export function isSensor(item: unknown): item is Sensor {
 }
 
 export interface SensorCondition extends AstNode {
-    readonly $container: BinaryCondition | Transition | UnaryCondition;
+    readonly $container: BinaryCondition | Exception | Transition | UnaryCondition;
     readonly $type: 'SensorCondition';
     sensor: Reference<Sensor>
     value: Signal
@@ -141,7 +155,7 @@ export function isState(item: unknown): item is State {
 }
 
 export interface TemporalCondition extends AstNode {
-    readonly $container: BinaryCondition | Transition | UnaryCondition;
+    readonly $container: BinaryCondition | Exception | Transition | UnaryCondition;
     readonly $type: 'TemporalCondition';
     duration: number
 }
@@ -166,7 +180,7 @@ export function isTransition(item: unknown): item is Transition {
 }
 
 export interface UnaryCondition extends AstNode {
-    readonly $container: BinaryCondition | Transition | UnaryCondition;
+    readonly $container: BinaryCondition | Exception | Transition | UnaryCondition;
     readonly $type: 'UnaryCondition';
     condition: Condition
     operator: UnaryOperator
@@ -198,6 +212,7 @@ export interface ArduinoMlAstType {
     BinaryOperator: BinaryOperator
     Brick: Brick
     Condition: Condition
+    Exception: Exception
     Sensor: Sensor
     SensorCondition: SensorCondition
     Signal: Signal
@@ -211,7 +226,7 @@ export interface ArduinoMlAstType {
 export class ArduinoMlAstReflection extends AbstractAstReflection {
 
     getAllTypes(): string[] {
-        return ['Action', 'Actuator', 'App', 'BinaryCondition', 'BinaryOperator', 'Brick', 'Condition', 'Sensor', 'SensorCondition', 'Signal', 'State', 'TemporalCondition', 'Transition', 'UnaryCondition', 'UnaryOperator'];
+        return ['Action', 'Actuator', 'App', 'BinaryCondition', 'BinaryOperator', 'Brick', 'Condition', 'Exception', 'Sensor', 'SensorCondition', 'Signal', 'State', 'TemporalCondition', 'Transition', 'UnaryCondition', 'UnaryOperator'];
     }
 
     protected override computeIsSubtype(subtype: string, supertype: string): boolean {
@@ -258,6 +273,7 @@ export class ArduinoMlAstReflection extends AbstractAstReflection {
                     name: 'App',
                     mandatory: [
                         { name: 'bricks', type: 'array' },
+                        { name: 'exceptions', type: 'array' },
                         { name: 'states', type: 'array' }
                     ]
                 };

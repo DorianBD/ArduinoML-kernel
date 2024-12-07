@@ -30,84 +30,113 @@ long debounce = 200;
 enum STATE {` + app.states.map(s => s.name).join(', ') + `};
 
 STATE currentState = ` + ((_a = app.initial.ref) === null || _a === void 0 ? void 0 : _a.name) + `;`, langium_1.NL);
+    const EXCEPTION_HIGH_DURATION = 600;
+    const EXCEPTION_LOW_DURATION = 200;
+    const EXCEPTION_IDLE_DURATION = 1200;
+    const EXCEPTION_LED_PIN = 12;
     for (const brick of app.bricks) {
-        if ("inputPin" in brick) {
-            fileNode.append(`
-bool ` + brick.name + `BounceGuard = false;
-long ` + brick.name + `LastDebounceTime = 0;
-
-            `, langium_1.NL);
+        if (brick.$type === "Sensor") {
+            fileNode.append(`bool ` + brick.name + `BounceGuard = false;
+long ` + brick.name + `LastDebounceTime = 0;`, langium_1.NL);
+            newLine(fileNode);
         }
     }
+    fileNode.append(`int exceptionNumber = 0;`, langium_1.NL);
     fileNode.append(`long startTime = millis();`, langium_1.NL);
-    fileNode.append(`
-	void setup(){`);
+    fileNode.append(`\nvoid setup() {`, langium_1.NL);
+    if (app.exceptions.length > 0) {
+        fileNode.append(`   pinMode( ${EXCEPTION_LED_PIN}, OUTPUT); // Exception LED`, langium_1.NL);
+    }
     for (const brick of app.bricks) {
-        if ("inputPin" in brick) {
-            compileSensor(brick, fileNode);
-        }
-        else {
-            compileActuator(brick, fileNode);
+        switch (brick.$type) {
+            case "Sensor":
+                compileSensor(brick, fileNode);
+                break;
+            case "Actuator":
+                compileActuator(brick, fileNode);
+                break;
         }
     }
-    fileNode.append(`
-	}
-	void loop() {
-			switch(currentState){`, langium_1.NL);
+    fileNode.append(`}
+    
+void loop() {`, langium_1.NL);
+    if (app.exceptions.length > 0) {
+        fileNode.append(`if(exceptionNumber > 0){
+        for(int i = exceptionNumber; i > 0; i--){
+            digitalWrite(${EXCEPTION_LED_PIN}, HIGH);
+            delay(${EXCEPTION_HIGH_DURATION});
+            digitalWrite(${EXCEPTION_LED_PIN}, LOW);
+            delay(${EXCEPTION_LOW_DURATION});
+        }
+        delay(${EXCEPTION_IDLE_DURATION});
+        return;
+    }`, langium_1.NL);
+        const exceptionsSensorsSet = new Set(app.exceptions
+            .flatMap(exception => getSensors(exception.condition)) // Get all sensors for all exceptions
+        );
+        newLine(fileNode);
+        for (const sensor of exceptionsSensorsSet) {
+            compileDebounce(sensor, fileNode, 1);
+        }
+        newLine(fileNode);
+        for (const exception of app.exceptions) {
+            fileNode.append(`   if(`);
+            compileCondition(exception.condition, fileNode);
+            fileNode.append(`){
+        exceptionNumber = ` + exception.value + `;
+        return;
+    }`, langium_1.NL);
+        }
+    }
+    fileNode.append(`\n   switch(currentState){`, langium_1.NL);
     for (const state of app.states) {
-        compileState(state, fileNode);
+        compileState(state, fileNode, 2);
     }
-    fileNode.append(`
-		}
-	}
-	`, langium_1.NL);
+    fileNode.append(getTabString(1) + `}
+}`, langium_1.NL);
 }
 function compileActuator(actuator, fileNode) {
-    fileNode.append(`
-		pinMode(` + actuator.outputPin + `, OUTPUT); // ` + actuator.name + ` [Actuator]`);
+    fileNode.append(`   pinMode(` + actuator.outputPin + `, OUTPUT); // ` + actuator.name + ` [Actuator]`, langium_1.NL);
 }
 function compileSensor(sensor, fileNode) {
-    fileNode.append(`
-		pinMode(` + sensor.inputPin + `, INPUT); // ` + sensor.name + ` [Sensor]`);
+    fileNode.append(`   pinMode(` + sensor.inputPin + `, INPUT); // ` + sensor.name + ` [Sensor]`, langium_1.NL);
 }
-function compileState(state, fileNode) {
-    fileNode.append(`
-				case ` + state.name + `:`);
+function compileState(state, fileNode, tabNumber = 0) {
+    fileNode.append(getTabString(tabNumber) + `case ` + state.name + `:`, langium_1.NL);
     for (const action of state.actions) {
-        compileAction(action, fileNode);
+        compileAction(action, fileNode, tabNumber + 1);
     }
     for (const transition of state.transitions) {
-        compileTransition(transition, fileNode);
+        newLine(fileNode);
+        compileTransition(transition, fileNode, tabNumber + 1);
     }
-    fileNode.append(`
-                    break;`);
+
+    fileNode.append(getTabString(tabNumber + 1) + `break;`, langium_1.NL);
+    newLine(fileNode);
 }
-function compileAction(action, fileNode) {
+function newLine(fileNode) {
+    fileNode.append("", langium_1.NL);
+}
+function compileAction(action, fileNode, tabNumber = 0) {
     var _a;
-    fileNode.append(`
-					digitalWrite(` + ((_a = action.actuator.ref) === null || _a === void 0 ? void 0 : _a.outputPin) + `,` + action.value.value + `);`);
+    fileNode.append(getTabString(tabNumber) + `digitalWrite(` + ((_a = action.actuator.ref) === null || _a === void 0 ? void 0 : _a.outputPin) + `,` + action.value.value + `);`, langium_1.NL);
 }
-function compileTransition(transition, fileNode) {
+function compileTransition(transition, fileNode, tabNumber = 0) {
     var _a;
     const sensors = getSensors(transition.condition);
     for (const sensor of sensors) {
-        fileNode.append(`
-                    ` + sensor.name + `BounceGuard = millis() - ` + sensor.name + `LastDebounceTime > debounce;`);
+        compileDebounce(sensor, fileNode, tabNumber);
     }
-    fileNode.append(`
-                    if (`);
-    compileCondition(transition.condition, fileNode);
-    fileNode.append(`)  {`);
-    fileNode.append(`
-                        currentState = ` + ((_a = transition.next.ref) === null || _a === void 0 ? void 0 : _a.name) + `;`);
-    fileNode.append(`
-                        startTime = millis();`);
+    newLine(fileNode);
+    fileNode.append(getTabString(tabNumber) + `if (`);
+    compileCondition(transition.condition, fileNode, tabNumber);
+    fileNode.append(`)  {`, langium_1.NL);
+    fileNode.append(getTabString(tabNumber + 1) + `currentState = ` + ((_a = transition.next.ref) === null || _a === void 0 ? void 0 : _a.name) + `;`, langium_1.NL);
+    fileNode.append(getTabString(tabNumber + 1) + `startTime = millis();`, langium_1.NL);
     for (const sensor of sensors) {
-        fileNode.append(`
-                        ` + sensor.name + `LastDebounceTime = millis();`);
+        fileNode.append(getTabString(tabNumber + 1) + sensor.name + `LastDebounceTime = millis();`, langium_1.NL);
     }
-    fileNode.append(`
-                    }`);
+    fileNode.append(getTabString(tabNumber) + `}`, langium_1.NL);
 }
 function getSensors(condition) {
     switch (condition.$type) {
@@ -123,7 +152,7 @@ function getSensors(condition) {
             return [];
     }
 }
-function compileCondition(condition, fileNode) {
+function compileCondition(condition, fileNode, tabNumber = 0) {
     switch (condition.$type) {
         case "BinaryCondition":
             compileBinaryCondition(condition, fileNode);
@@ -138,6 +167,12 @@ function compileCondition(condition, fileNode) {
             compileTemporalCondition(condition, fileNode);
             break;
     }
+}
+function getTabString(taNumber) {
+    return "    ".repeat(taNumber);
+}
+function compileDebounce(sensor, fileNode, tabNumber = 0) {
+    fileNode.append(getTabString(tabNumber) + sensor.name + `BounceGuard = millis() - ` + sensor.name + `LastDebounceTime > debounce;`, langium_1.NL);
 }
 function compileSensorCondition(sensorCondition, fileNode) {
     var _a, _b;

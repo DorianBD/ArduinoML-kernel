@@ -5,11 +5,15 @@ entry App:
 	'{'
 		'bricks'
 		bricks+=Brick
-		(bricks+=Brick)* 
+		(bricks+=Brick)*
+
+		('exceptions'
+        exceptions+=Exception
+        (exceptions+=Exception)*)?
 		
 		'states'
 		states+=State
-		(states+=State)* 		
+		(states+=State)*
 	'}';
 
 Brick :
@@ -30,6 +34,10 @@ State :
 		transitions+=Transition
 		(transitions+=Transition)*
 	'}';
+
+Exception :
+	condition=Condition '=>' value=INT;
+
 
 Action :
 	actuator=[Actuator:ID] '<=' value=Signal;

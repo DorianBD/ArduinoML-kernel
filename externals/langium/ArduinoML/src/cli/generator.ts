@@ -43,95 +43,125 @@ enum STATE {` + app.states.map(s => s.name).join(', ') + `};
 
 STATE currentState = ` + app.initial.ref?.name + `;`
         , NL);
-
+    const EXCEPTION_HIGH_DURATION = 400;
+    const EXCEPTION_LOW_DURATION = 100;
+    const EXCEPTION_IDLE_DURATION = 1200;
+    const EXCEPTION_LED_PIN = 12;
     for (const brick of app.bricks) {
-        if ("inputPin" in brick) {
-            fileNode.append(`
-bool ` + brick.name + `BounceGuard = false;
-long ` + brick.name + `LastDebounceTime = 0;
+        if (brick.$type === "Sensor") {
+            fileNode.append(`bool ` + brick.name + `BounceGuard = false;
+long ` + brick.name + `LastDebounceTime = 0;`, NL);
+            newLine(fileNode);
 
-            `, NL);
         }
     }
+    fileNode.append(`int exceptionNumber = 0;`, NL);
     fileNode.append(`long startTime = millis();`, NL);
-    fileNode.append(`
-	void setup(){`);
+    fileNode.append(`\nvoid setup() {`, NL);
+    if (app.exceptions.length > 0) {
+        fileNode.append(`   pinMode( ${EXCEPTION_LED_PIN}, OUTPUT); // Exception LED`, NL);
+    }
     for (const brick of app.bricks) {
-        if ("inputPin" in brick) {
-            compileSensor(brick, fileNode);
-        } else {
-            compileActuator(brick, fileNode);
+        switch (brick.$type) {
+            case "Sensor":
+                compileSensor(brick, fileNode);
+                break;
+            case "Actuator":
+                compileActuator(brick, fileNode);
+                break;
         }
     }
+    fileNode.append(`}
+    
+void loop() {`, NL);
+    if (app.exceptions.length > 0) {
 
+        fileNode.append(`if(exceptionNumber > 0){
+        for(int i = exceptionNumber; i > 0; i--){
+            digitalWrite(${EXCEPTION_LED_PIN}, HIGH);
+            delay(${EXCEPTION_HIGH_DURATION});
+            digitalWrite(${EXCEPTION_LED_PIN}, LOW);
+            delay(${EXCEPTION_LOW_DURATION});
+        }
+        delay(${EXCEPTION_IDLE_DURATION});
+        return;
+    }`, NL);
 
-    fileNode.append(`
-	}
-	void loop() {
-			switch(currentState){`, NL)
-    for (const state of app.states) {
-        compileState(state, fileNode)
+        const exceptionsSensorsSet: Set<Sensor> = new Set(
+            app.exceptions
+                .flatMap(exception => getSensors(exception.condition)) // Get all sensors for all exceptions
+        );
+
+        newLine(fileNode);
+
+        for (const sensor of exceptionsSensorsSet) {
+            compileDebounce(sensor, fileNode, 1);
+        }
+        newLine(fileNode);
+
+        for (const exception of app.exceptions) {
+            fileNode.append(`   if(`);
+            compileCondition(exception.condition, fileNode);
+            fileNode.append(`){
+        exceptionNumber = ` + exception.value + `;
+        return;
+    }`, NL);
+        }
+
     }
-    fileNode.append(`
-		}
-	}
-	`, NL);
-
+    fileNode.append(`\n   switch(currentState){`, NL);
+    for (const state of app.states) {
+        compileState(state, fileNode, 2);
+    }
+    fileNode.append(getTabString(1) + `}
+}`, NL);
 
 }
 
 function compileActuator(actuator: Actuator, fileNode: CompositeGeneratorNode) {
-    fileNode.append(`
-		pinMode(` + actuator.outputPin + `, OUTPUT); // ` + actuator.name + ` [Actuator]`)
+    fileNode.append(`   pinMode(` + actuator.outputPin + `, OUTPUT); // ` + actuator.name + ` [Actuator]`, NL)
 }
 
 function compileSensor(sensor: Sensor, fileNode: CompositeGeneratorNode) {
-    fileNode.append(`
-		pinMode(` + sensor.inputPin + `, INPUT); // ` + sensor.name + ` [Sensor]`)
+    fileNode.append(`   pinMode(` + sensor.inputPin + `, INPUT); // ` + sensor.name + ` [Sensor]`, NL)
 }
 
-function compileState(state: State, fileNode: CompositeGeneratorNode) {
-    fileNode.append(`
-				case ` + state.name + `:`)
+function compileState(state: State, fileNode: CompositeGeneratorNode, tabNumber: number = 0) {
+    fileNode.append(getTabString(tabNumber) + `case ` + state.name + `:`, NL)
     for (const action of state.actions) {
-        compileAction(action, fileNode)
+        compileAction(action, fileNode, tabNumber + 1)
     }
-    
     for (const transition of state.transitions) {
-        compileTransition(transition, fileNode)
+        newLine(fileNode);
+        compileTransition(transition, fileNode, tabNumber + 1)
     }
-        
-    fileNode.append(`
-                    break;`)
+    fileNode.append(getTabString(tabNumber + 1) + `break;`, NL)
+    newLine(fileNode);
 }
 
-
-function compileAction(action: Action, fileNode: CompositeGeneratorNode) {
-    fileNode.append(`
-					digitalWrite(` + action.actuator.ref?.outputPin + `,` + action.value.value + `);`)
+function newLine(fileNode: CompositeGeneratorNode) {
+    fileNode.append("", NL);
 }
 
-function compileTransition(transition: Transition, fileNode: CompositeGeneratorNode) {
+function compileAction(action: Action, fileNode: CompositeGeneratorNode, tabNumber: number = 0) {
+    fileNode.append(getTabString(tabNumber) + `digitalWrite(` + action.actuator.ref?.outputPin + `,` + action.value.value + `);`, NL)
+}
+
+function compileTransition(transition: Transition, fileNode: CompositeGeneratorNode, tabNumber: number = 0) {
     const sensors: Sensor[] = getSensors(transition.condition);
     for (const sensor of sensors) {
-        fileNode.append(`
-                    ` + sensor.name + `BounceGuard = millis() - ` + sensor.name + `LastDebounceTime > debounce;`
-        )
+        compileDebounce(sensor, fileNode, tabNumber);
     }
-    fileNode.append(`
-                    if (`);
-    compileCondition(transition.condition, fileNode);
-    fileNode.append(`)  {`);
-    fileNode.append(`
-                        currentState = ` + transition.next.ref?.name + `;`);
-    fileNode.append(`
-                        startTime = millis();`);
+    newLine(fileNode);
+    fileNode.append(getTabString(tabNumber) + `if (`);
+    compileCondition(transition.condition, fileNode, tabNumber);
+    fileNode.append(`)  {`, NL);
+    fileNode.append(getTabString(tabNumber + 1) + `currentState = ` + transition.next.ref?.name + `;`, NL);
+    fileNode.append(getTabString(tabNumber + 1) + `startTime = millis();`, NL);
     for (const sensor of sensors) {
-        fileNode.append(`
-                        ` + sensor.name + `LastDebounceTime = millis();`);
+        fileNode.append(getTabString(tabNumber + 1) + sensor.name + `LastDebounceTime = millis();`, NL);
     }
-    fileNode.append(`
-                    }`);
+    fileNode.append(getTabString(tabNumber) + `}`, NL);
 
 }
 
@@ -149,9 +179,8 @@ function getSensors(condition: Condition): Sensor[] {
     }
 }
 
-function compileCondition(condition: Condition, fileNode: CompositeGeneratorNode) {
+function compileCondition(condition: Condition, fileNode: CompositeGeneratorNode, tabNumber: number = 0) {
     switch (condition.$type) {
-
         case "BinaryCondition":
             compileBinaryCondition(condition, fileNode);
             break;
@@ -165,6 +194,15 @@ function compileCondition(condition: Condition, fileNode: CompositeGeneratorNode
             compileTemporalCondition(condition, fileNode);
             break;
     }
+}
+
+function getTabString(taNumber: number): string {
+    return "    ".repeat(taNumber);
+}
+
+function compileDebounce(sensor: Sensor, fileNode: CompositeGeneratorNode, tabNumber: number = 0) {
+    fileNode.append(getTabString(tabNumber) + sensor.name + `BounceGuard = millis() - ` + sensor.name + `LastDebounceTime > debounce;`, NL
+    )
 }
 
 function compileSensorCondition(sensorCondition: SensorCondition, fileNode: CompositeGeneratorNode) {

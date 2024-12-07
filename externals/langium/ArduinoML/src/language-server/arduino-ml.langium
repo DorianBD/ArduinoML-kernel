@@ -5,7 +5,11 @@ entry App:
 	'{'
 		'bricks'
 		bricks+=Brick
-		(bricks+=Brick)* 
+		(bricks+=Brick)*
+
+		('exceptions'
+        exceptions+=Exception
+        (exceptions+=Exception)*)?
 		
 		'states'
 		states+=State
@@ -29,6 +33,9 @@ State :
 		(actions+=Action)*
 		transition=Transition
 	'}';
+
+Exception :
+	condition=Condition '=>' value=INT;
 
 
 Action :

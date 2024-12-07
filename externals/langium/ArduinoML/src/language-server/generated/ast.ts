@@ -131,7 +131,7 @@ export interface State extends AstNode {
     readonly $type: 'State';
     actions: Array<Action>
     name: string
-    transition: Transition
+    transitions: Array<Transition>
 }
 
 export const State = 'State';
@@ -266,7 +266,8 @@ export class ArduinoMlAstReflection extends AbstractAstReflection {
                 return {
                     name: 'State',
                     mandatory: [
-                        { name: 'actions', type: 'array' }
+                        { name: 'actions', type: 'array' },
+                        { name: 'transitions', type: 'array' }
                     ]
                 };
             }

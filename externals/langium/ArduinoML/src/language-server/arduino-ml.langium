@@ -9,7 +9,7 @@ entry App:
 		
 		'states'
 		states+=State
-		( states+=State)* 		
+		(states+=State)* 		
 	'}';
 
 Brick :
@@ -27,9 +27,9 @@ State :
 	name=ID '{'
 		actions+=Action
 		(actions+=Action)*
-		transition=Transition
+		transitions+=Transition
+		(transitions+=Transition)*
 	'}';
-
 
 Action :
 	actuator=[Actuator:ID] '<=' value=Signal;
@@ -39,7 +39,6 @@ Transition :
 
 Condition :
     (SensorCondition | TemporalCondition | UnaryCondition | BinaryCondition);
-
 
 UnaryCondition :
     operator=UnaryOperator condition=Condition;
@@ -55,15 +54,16 @@ TemporalCondition:
 
 BinaryOperator:
     value=(AND | OR);
-terminal AND: 'AND';
-terminal OR: 'OR';
 
 UnaryOperator:
     value=NOT;
-terminal NOT: 'NOT';
 
 Signal:
     value=(HIGH | LOW);
+
+terminal AND: 'AND';
+terminal OR: 'OR';
+terminal NOT: 'NOT';
 terminal HIGH : 'HIGH';
 terminal LOW : 'LOW';
 

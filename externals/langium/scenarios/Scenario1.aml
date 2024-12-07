@@ -1,4 +1,4 @@
-app RedButton initial state off {
+app redApp initial state off {
 	bricks
 		Actuator red_led : 9
 		Actuator buzzer : 10
@@ -14,7 +14,15 @@ app RedButton initial state off {
 		on {
 			red_led <= HIGH
 			buzzer <= HIGH
-			button is LOW => off
+			(after 800 AND button is HIGH) => off // OK
+			(after 800 OR after 400) => off // OK
+			(after 800 AND after 400) => off // ERROR
+			NOT after 800 => off // ERROR
+			(after 800 OR (after 400 AND button is HIGH)) => off // OK
+			(after 800 AND (after 400 AND button is HIGH)) => off // ERROR
+			((after 800 OR (after 400 AND button is HIGH)) AND after 800) => off // ERROR
+			((after 800 OR (after 400 AND button is HIGH)) AND button is HIGH) => off // OK
+
 		}
 }
 

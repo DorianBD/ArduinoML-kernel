@@ -1,2 +1,8 @@
 node_modules
 node_modules/
+
+src/language-server/generated
+src/language-server/generated/
+
+out
+out/

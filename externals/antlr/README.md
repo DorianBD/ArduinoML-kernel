@@ -23,7 +23,7 @@ We consider here that the current directory is the `antlr` directory.
   2. Then, compile the ANTLR code
     * `mvn clean package`
   3. Run the compiler using the `exec` plugin:
-    * `mvn exec:java -Dexec.args=src/main/resources/pin_allocation_type.arduinoml`
+    * `mvn exec:java -Dexec.args=src/main/resources/pin_allocation_too_many_analogOutput.arduinoml`
     
 ## Code Description
 
@@ -70,3 +70,17 @@ According to this sheme, here is the pin allocation for the different components
 | Analog IN       | 	A0(14), A1(15), A2(16), A3(17), A4(18), A5(19) |
 | Digital IN/OUT  | 	0 - 13                                         |
 | PWM (Analog OUT)	| 3, 5, 6, 9, 10, 11                              |
+
+### Example
+
+`mvn exec:java -Dexec.args=src/main/resources/pin_allocation_too_many_analogOutput.arduinoml`
+-> show that the pinAllocator will throw an exception if the user tries to allocate more than 6 analogOutput components
+
+`mvn exec:java -Dexec.args=src/main/resources/pin_allocation_type.arduinoml`
+-> show that pinAllocator allocate the pins correctly according to the type of the component and if it's an input or an output
+
+`mvn exec:java -Dexec.args=src/main/resources/pin_allocation_multiActuatorDemo.arduinoml`
+->  This scenario shows dynamic allocation for a complex mix of sensors and actuators (two digital and two analog). The transitions between states demonstrate that each component is correctly configured.
+
+`mvn exec:java -Dexec.args=src/main/resources/pin_allocation_allon.arduinoml`
+-> This case tests the limits of your extension, requiring dynamic allocation for several digital and analog components.

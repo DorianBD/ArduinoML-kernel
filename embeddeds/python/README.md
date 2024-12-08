@@ -1,3 +1,12 @@
+## INTRODUCTION
+
+The work added during the DSL course is mostly contained in the methodchaining folder and some modifications are in the model folder.
+
+The added scenarios are in the main.py file and can be run from there with the command ```python3 -m pyArduinoML.methodchaining.Main```.
+
+The rest of the README.md was already written by the people who created the DSL.
+
+## README
 The example we use is the one described [here](https://github.com/mosser/ArduinoML-kernel/blob/master/README.md)
 and [here](https://github.com/mosser/ArduinoML-kernel/blob/master/docs/README.md)
 

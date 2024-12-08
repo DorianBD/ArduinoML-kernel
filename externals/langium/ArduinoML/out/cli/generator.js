@@ -35,8 +35,11 @@ enum STATE {` + app.states.map(s => s.name).join(', ') + `};
 STATE currentState = ` + ((_a = app.initial.ref) === null || _a === void 0 ? void 0 : _a.name) + `;`, langium_1.NL);
     newLine(fileNode);
     if (app.ldcs.length > 0) {
+        fileNode.append(`long ldcDebounce = 1000;`, langium_1.NL);
         for (const ldc of app.ldcs) {
             compileLDC(ldc, fileNode);
+            //create ldc last set time
+            fileNode.append(`long ` + ldc.name + `LastSetTime = 0;`, langium_1.NL);
         }
         newLine(fileNode);
     }
@@ -113,10 +116,12 @@ function compileLDC(ldc, fileNode) {
     fileNode.append(`LiquidCrystal ` + ldc.name + `(` + ldc.rs + `, ` + ldc.en + `, ` + ldc.d4 + `, ` + ldc.d5 + `, ` + ldc.d6 + `, ` + ldc.d7 + `, ` + ldc.backlight + `);`, langium_1.NL);
 }
 function compileLDCWrite(ldc, fileNode) {
-    //  lcd.print the value of their sensor ex : button := HIGH
-    fileNode.append(`   ` + ldc.name + `.clear();`, langium_1.NL);
+    fileNode.append(`   if(millis() - ` + ldc.name + `LastSetTime > ldcDebounce){
+       ` + ldc.name + `.clear();`, langium_1.NL);
     const sensor = ldc.sensor.ref;
-    fileNode.append(`   ` + ldc.name + `.print(String("` + (sensor === null || sensor === void 0 ? void 0 : sensor.name) + ` := ") + (digitalRead(` + (sensor === null || sensor === void 0 ? void 0 : sensor.inputPin) + `) == HIGH ? "HIGH" : "LOW"));`, langium_1.NL);
+    fileNode.append(`       ` + ldc.name + `.print(String("` + (sensor === null || sensor === void 0 ? void 0 : sensor.name) + ` := ") + (digitalRead(` + (sensor === null || sensor === void 0 ? void 0 : sensor.inputPin) + `) == HIGH ? "HIGH" : "LOW"));`, langium_1.NL);
+    fileNode.append(`       ` + ldc.name + `LastSetTime = millis();
+    }`, langium_1.NL);
 }
 function compileActuator(actuator, fileNode) {
     fileNode.append(`   pinMode(` + actuator.outputPin + `, OUTPUT); // ` + actuator.name + ` [Actuator]`, langium_1.NL);
@@ -129,9 +134,9 @@ function compileState(state, fileNode, tabNumber = 0) {
     for (const action of state.actions) {
         compileAction(action, fileNode, tabNumber + 1);
     }
-    if (state.transition !== null) {
+    for (const transition of state.transitions) {
         newLine(fileNode);
-        compileTransition(state.transition, fileNode, tabNumber + 1);
+        compileTransition(transition, fileNode, tabNumber + 1);
     }
     fileNode.append(getTabString(tabNumber + 1) + `break;`, langium_1.NL);
     newLine(fileNode);

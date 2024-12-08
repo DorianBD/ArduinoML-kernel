@@ -8,7 +8,9 @@ enum STATE {off, on};
 
 STATE currentState = off;
 
+long ldcDebounce = 1000;
 LiquidCrystal myLDC(10, 11, 12, 13, 14, 15, 16);
+long myLDCLastSetTime = 0;
 
 bool buttonBounceGuard = false;
 long buttonLastDebounceTime = 0;
@@ -22,8 +24,11 @@ void setup() {
 }
     
 void loop() {
-   myLDC.clear();
-   myLDC.print(String("button := ") + (digitalRead(10) == HIGH ? "HIGH" : "LOW"));
+   if(millis() - myLDCLastSetTime > ldcDebounce){
+       myLDC.clear();
+       myLDC.print(String("button := ") + (digitalRead(10) == HIGH ? "HIGH" : "LOW"));
+       myLDCLastSetTime = millis();
+    }
 
    switch(currentState){
         case off:

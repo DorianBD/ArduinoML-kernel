@@ -53,6 +53,7 @@ export interface App extends AstNode {
     bricks: Array<Brick>
     exceptions: Array<Exception>
     initial: Reference<State>
+    ldcs: Array<LDC>
     name: string
     states: Array<State>
 }
@@ -100,6 +101,26 @@ export const Exception = 'Exception';
 
 export function isException(item: unknown): item is Exception {
     return reflection.isInstance(item, Exception);
+}
+
+export interface LDC extends AstNode {
+    readonly $container: App;
+    readonly $type: 'LDC';
+    backlight: number
+    d4: number
+    d5: number
+    d6: number
+    d7: number
+    en: number
+    name: string
+    rs: number
+    sensor: Reference<Sensor>
+}
+
+export const LDC = 'LDC';
+
+export function isLDC(item: unknown): item is LDC {
+    return reflection.isInstance(item, LDC);
 }
 
 export interface Sensor extends AstNode {
@@ -213,6 +234,7 @@ export interface ArduinoMlAstType {
     Brick: Brick
     Condition: Condition
     Exception: Exception
+    LDC: LDC
     Sensor: Sensor
     SensorCondition: SensorCondition
     Signal: Signal
@@ -226,7 +248,7 @@ export interface ArduinoMlAstType {
 export class ArduinoMlAstReflection extends AbstractAstReflection {
 
     getAllTypes(): string[] {
-        return ['Action', 'Actuator', 'App', 'BinaryCondition', 'BinaryOperator', 'Brick', 'Condition', 'Exception', 'Sensor', 'SensorCondition', 'Signal', 'State', 'TemporalCondition', 'Transition', 'UnaryCondition', 'UnaryOperator'];
+        return ['Action', 'Actuator', 'App', 'BinaryCondition', 'BinaryOperator', 'Brick', 'Condition', 'Exception', 'LDC', 'Sensor', 'SensorCondition', 'Signal', 'State', 'TemporalCondition', 'Transition', 'UnaryCondition', 'UnaryOperator'];
     }
 
     protected override computeIsSubtype(subtype: string, supertype: string): boolean {
@@ -257,6 +279,7 @@ export class ArduinoMlAstReflection extends AbstractAstReflection {
             case 'Transition:next': {
                 return State;
             }
+            case 'LDC:sensor':
             case 'SensorCondition:sensor': {
                 return Sensor;
             }
@@ -274,6 +297,7 @@ export class ArduinoMlAstReflection extends AbstractAstReflection {
                     mandatory: [
                         { name: 'bricks', type: 'array' },
                         { name: 'exceptions', type: 'array' },
+                        { name: 'ldcs', type: 'array' },
                         { name: 'states', type: 'array' }
                     ]
                 };

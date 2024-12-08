@@ -24,12 +24,22 @@ function compile(app, fileNode) {
     var _a;
     fileNode.append(`
 //Wiring code generated from an ArduinoML model
-// Application name: ` + app.name + `
-
+// Application name: ` + app.name, langium_1.NL);
+    if (app.ldcs.length > 0) {
+        fileNode.append(`#include <LiquidCrystal.h>`, langium_1.NL);
+    }
+    fileNode.append(`
 long debounce = 200;
 enum STATE {` + app.states.map(s => s.name).join(', ') + `};
 
 STATE currentState = ` + ((_a = app.initial.ref) === null || _a === void 0 ? void 0 : _a.name) + `;`, langium_1.NL);
+    newLine(fileNode);
+    if (app.ldcs.length > 0) {
+        for (const ldc of app.ldcs) {
+            compileLDC(ldc, fileNode);
+        }
+        newLine(fileNode);
+    }
     const EXCEPTION_HIGH_DURATION = 400;
     const EXCEPTION_LOW_DURATION = 100;
     const EXCEPTION_IDLE_DURATION = 1200;
@@ -60,8 +70,12 @@ long ` + brick.name + `LastDebounceTime = 0;`, langium_1.NL);
     fileNode.append(`}
     
 void loop() {`, langium_1.NL);
+    //write in the ldcs the values of their sensors
+    for (const ldc of app.ldcs) {
+        compileLDCWrite(ldc, fileNode);
+    }
     if (app.exceptions.length > 0) {
-        fileNode.append(`if(exceptionNumber > 0){
+        fileNode.append(`   if(exceptionNumber > 0){
         for(int i = exceptionNumber; i > 0; i--){
             digitalWrite(${EXCEPTION_LED_PIN}, HIGH);
             delay(${EXCEPTION_HIGH_DURATION});
@@ -95,6 +109,15 @@ void loop() {`, langium_1.NL);
     fileNode.append(getTabString(1) + `}
 }`, langium_1.NL);
 }
+function compileLDC(ldc, fileNode) {
+    fileNode.append(`LiquidCrystal ` + ldc.name + `(` + ldc.rs + `, ` + ldc.en + `, ` + ldc.d4 + `, ` + ldc.d5 + `, ` + ldc.d6 + `, ` + ldc.d7 + `, ` + ldc.backlight + `);`, langium_1.NL);
+}
+function compileLDCWrite(ldc, fileNode) {
+    //  lcd.print the value of their sensor ex : button := HIGH
+    fileNode.append(`   ` + ldc.name + `.clear();`, langium_1.NL);
+    const sensor = ldc.sensor.ref;
+    fileNode.append(`   ` + ldc.name + `.print(String("` + (sensor === null || sensor === void 0 ? void 0 : sensor.name) + ` := ") + (digitalRead(` + (sensor === null || sensor === void 0 ? void 0 : sensor.inputPin) + `) == HIGH ? "HIGH" : "LOW"));`, langium_1.NL);
+}
 function compileActuator(actuator, fileNode) {
     fileNode.append(`   pinMode(` + actuator.outputPin + `, OUTPUT); // ` + actuator.name + ` [Actuator]`, langium_1.NL);
 }
@@ -106,9 +129,9 @@ function compileState(state, fileNode, tabNumber = 0) {
     for (const action of state.actions) {
         compileAction(action, fileNode, tabNumber + 1);
     }
-    for (const transition of state.transitions) {
+    if (state.transition !== null) {
         newLine(fileNode);
-        compileTransition(transition, fileNode, tabNumber + 1);
+        compileTransition(state.transition, fileNode, tabNumber + 1);
     }
     fileNode.append(getTabString(tabNumber + 1) + `break;`, langium_1.NL);
     newLine(fileNode);

@@ -51,8 +51,11 @@ STATE currentState = ` + app.initial.ref?.name + `;`
     newLine(fileNode);
 
     if (app.ldcs.length > 0) {
+        fileNode.append(`long ldcDebounce = 1000;`, NL);
         for (const ldc of app.ldcs) {
             compileLDC(ldc, fileNode);
+            //create ldc last set time
+            fileNode.append(`long ` + ldc.name + `LastSetTime = 0;`, NL);
         }
         newLine(fileNode);
     }
@@ -143,12 +146,14 @@ function compileLDC(ldc: LDC, fileNode: CompositeGeneratorNode) {
 }
 
 function compileLDCWrite(ldc: LDC, fileNode: CompositeGeneratorNode) {
-    //  lcd.print the value of their sensor ex : button := HIGH
-    fileNode.append(`   ` + ldc.name + `.clear();`, NL);
+    fileNode.append(`   if(millis() - ` + ldc.name + `LastSetTime > ldcDebounce){
+       ` + ldc.name + `.clear();`, NL);
     const sensor = ldc.sensor.ref;
-    fileNode.append(`   ` + ldc.name + `.print(String("` + sensor?.name + ` := ") + (digitalRead(` + sensor?.inputPin + `) == HIGH ? "HIGH" : "LOW"));`,
+    fileNode.append(`       ` + ldc.name + `.print(String("` + sensor?.name + ` := ") + (digitalRead(` + sensor?.inputPin + `) == HIGH ? "HIGH" : "LOW"));`,
         NL
     );
+    fileNode.append(`       ` + ldc.name + `LastSetTime = millis();
+    }`, NL);
 
 
 }

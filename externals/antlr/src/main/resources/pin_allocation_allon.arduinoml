@@ -1,0 +1,32 @@
+application fullCapacityTest
+
+# Declaring bricks
+sensor lightSensor : ANALOG
+sensor tempSensor : ANALOG
+sensor soundSensor : ANALOG
+actuator ledA : DIGITAL
+actuator ledB : DIGITAL
+actuator motorA : ANALOG
+actuator motorB : ANALOG
+actuator fan : ANALOG
+actuator buzzer : DIGITAL
+
+# Declaring states
+allOn {
+    ledA <= HIGH
+    ledB <= HIGH
+    motorA <= HIGH
+    motorB <= HIGH
+    fan <= HIGH
+    buzzer <= HIGH
+    tempSensor is HIGH => cooling
+}
+
+-> cooling {
+    fan <= LOW
+    ledA <= LOW
+    ledB <= LOW
+    motorA <= LOW
+    motorB <= LOW
+    tempSensor is LOW => allOn
+}

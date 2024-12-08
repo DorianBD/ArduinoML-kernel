@@ -1,0 +1,30 @@
+application multiActuatorDemo
+
+# Declaring bricks
+actuator ledA : DIGITAL
+actuator ledB : DIGITAL
+actuator fan : ANALOG
+actuator heater : ANALOG
+sensor tempSensor : ANALOG
+sensor motionSensor : DIGITAL
+
+# Declaring states
+idle {
+    ledA <= LOW
+    ledB <= LOW
+    fan <= LOW
+    heater <= LOW
+    motionSensor is HIGH => active
+}
+
+-> active {
+    ledA <= HIGH
+    fan <= HIGH
+    tempSensor is HIGH => heating
+}
+
+-> heating {
+    heater <= HIGH
+    ledB <= HIGH
+    tempSensor is LOW => idle
+}

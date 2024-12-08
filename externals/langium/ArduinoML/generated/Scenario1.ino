@@ -6,6 +6,7 @@ long debounce = 200;
 enum STATE {off, on};
 
 STATE currentState = off;
+
 bool buzzerBounceGuard = false;
 long buzzerLastDebounceTime = 0;
 

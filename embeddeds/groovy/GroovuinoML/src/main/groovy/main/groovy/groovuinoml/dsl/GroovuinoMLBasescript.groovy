@@ -12,9 +12,9 @@
 	import io.github.mosser.arduinoml.kernel.behavioral.SensorCondition
 	import io.github.mosser.arduinoml.kernel.behavioral.TemporalCondition
 	import io.github.mosser.arduinoml.kernel.behavioral.UnaryCondition
-	import io.github.mosser.arduinoml.kernel.behavioral.UnaryOperator
+	import io.github.mosser.arduinoml.kernel.structural.BinaryOperator
 	import io.github.mosser.arduinoml.kernel.behavioral.BinaryCondition
-	import io.github.mosser.arduinoml.kernel.behavioral.BinaryOperator
+	import io.github.mosser.arduinoml.kernel.structural.UnaryOperator
 
 	class ErrorBuilder extends ConditionBuilder {
 		private int errornumber
@@ -96,7 +96,7 @@
 
 
 		def after(Number delay) {
-			conditions.add(new TemporalCondition(delay.intValue()))
+			conditions.add(new TemporalCondition(delay))
 			this
 		}
 
@@ -145,12 +145,12 @@
 		}
 
 		def andafter(Number delay) {
-			conditions.add(new TemporalCondition(delay))
+			conditions.add(new TemporalCondition(delay.intValue()))
 			this.andApply()
 		}
 
 		def orafter(Number delay) {
-			conditions.add(new TemporalCondition(delay))
+			conditions.add(new TemporalCondition(delay.intValue()))
 			this.orApply()
 		}
 

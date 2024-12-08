@@ -232,7 +232,11 @@ public class ToWiring extends Visitor<StringBuffer> {
 			return;
 		}
 		if(context.get("pass") == PASS.TWO) {
-			w(operator.getOperator());
+			switch (operator) {
+				case NOT:
+					w("!");
+					break;
+			}
 			return;
 		}
 	}
@@ -243,7 +247,14 @@ public class ToWiring extends Visitor<StringBuffer> {
 			return;
 		}
 		if(context.get("pass") == PASS.TWO) {
-			w(operator.getOperator());
+			switch (operator) {
+				case AND:
+					w("&&");
+					break;
+				case OR:
+					w("||");
+					break;
+			}
 			return;
 		}
 	}

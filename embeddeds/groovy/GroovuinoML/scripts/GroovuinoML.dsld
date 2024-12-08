@@ -5,36 +5,34 @@ import java.lang.reflect.Method;
 
 // The following snippet adds the 'newProp' to all types that are a subtype of GroovyObjects
 contribute(currentType(subType('groovy.lang.Script'))) {
+    // property definition methods
 	property name : 'high', type: Object, provider: 'GroovuinoML', doc: 'Stands for SIGNAL.HIGH'
 	property name : 'low', type: Object, provider: 'GroovuinoML', doc: 'Stands for SIGNAL.LOW'
 
-//	property name : 'led', type : Object, provider: 'GroovuinoML', doc: 'A variable'
-//	property name : 'led1', type : Object, provider: 'GroovuinoML', doc: 'A variable'
-//	property name : 'led2', type : Object, provider: 'GroovuinoML', doc: 'A variable'
-//	property name : 'led3', type : Object, provider: 'GroovuinoML', doc: 'A variable'
-//	property name : 'button', type : Object, provider: 'GroovuinoML', doc: 'A variable'
-//	property name : 'on', type : Object, provider: 'GroovuinoML', doc: 'A variable'
-//	property name : 'off', type : Object, provider: 'GroovuinoML', doc: 'A variable'
-
+    // sensor/actuator definition methods
 	method type: Script, name: 'sensor', params: [name:String], doc: 'Create a new Sensor'
 	method type: Script, name: 'actuator', params: [name:String], doc: 'Create a new Actuator'
 	method type: void, name: 'pin', params: [pinNumber:Integer], doc: 'Associate Sensor or Actuator to a pin number'
 	method type: void, name: 'onPin', params: [pinNumber:Integer], doc: 'Associate Sensor or Actuator to a pin number'
 
+    // state definition methods
 	method type: Script, name: 'state', params: [name:String], doc: 'Create a new State'
 	method type: Script, name: 'means', params: [actuator:Object], doc: 'Identify which Actuator is concerned by the state'
 	method type: Script, name: 'means', params: [actuatorName:String], doc: 'Identify which Actuator is concerned by the state'
 	method type: Script, name: 'becomes', params: [signal:Object], doc: 'Define new Actuator value'
 	method type: Script, name: 'becomes', params: [signalName:String], doc: 'Define new Actuator value'
 
+    // initial state definition methods
 	method type: void, name: 'initial', params: [state:Object], doc: 'Define the initial State'
 	method type: void, name: 'initial', params: [stateName:String], doc: 'Define the initial State'
 
+    // transition definition methods
 	method type: Script, name: 'from', params: [state:Object], doc: 'Define first state of a Transition'
 	method type: Script, name: 'from', params: [stateName:String], doc: 'Define first state of a Transition'
 	method type: Script, name: 'to', params: [state:Object], doc: 'Define second state of a Transition'
 	method type: Script, name: 'to', params: [stateName:String], doc: 'Define second state of a Transition'
 
+    // sensor conditon methods
 	method type: Script, name: 'when', params: [sensor:Object], doc: 'Identify a Sensor that triggers the Transition'
 	method type: Script, name: 'when', params: [sensorName:String], doc: 'Identify a Sensor that triggers the Transition'
 	method type: Script, name: 'andwhen', params: [sensor:Object], doc: 'AND - Define another Sensor to triggers the Transition'
@@ -42,11 +40,22 @@ contribute(currentType(subType('groovy.lang.Script'))) {
 	method type: Script, name: 'orwhen', params: [sensor:Object], doc: 'OR - Define another Sensor to triggers the Transition'
 	method type: Script, name: 'orwhen', params: [sensorName:String], doc: 'OR - Define another Sensor to triggers the Transition'
 
+	// methods associated with the 'when' type methods
+	method type: Script, name: 'becomes', params: [signal:Object], doc: 'Define the Sensor value that triggers the Transition'
+	method type: Script, name: 'becomes', params: [signalName:String], doc: 'Define the Sensor value that triggers the Transition'
+	method type: Script, name: 'doesntbecome', params: [signal:Object], doc: 'Define the Sensor value that does not trigger the Transition'
+	method type: Script, name: 'doesntbecome', params: [signalName:String], doc: 'Define the Sensor value that does not trigger the Transition'
+
+    // temporal condition methods
 	method type: Script, name: 'after', params: [delay:Number], doc: 'Define a delay before the Transition is triggered'
 	method type: Script, name: 'andafter', params: [delay:Number], doc: 'AND - Define a delay before the Transition is triggered'
 	method type: Script, name: 'orafter', params: [delay:Number], doc: 'OR - Define a delay before the Transition is triggered'
 
-	method type: Script, name: 'execute', params: [], doc: 'end the Transition definition'
+    // error handling methods
+	method type: Script, name: 'throwerror', params: [numError:Number], doc: 'Define the error number to throw'
+
+    // end of Transition definition to build the current transition or error
+	method type: Script, name: 'end', params: [], doc: 'end the condition definition, to build Transition or Error'
 
 	method type: void, name: 'export', params: [name:String], doc: 'Export the Arduino Script and define its name'
 }

@@ -7,14 +7,31 @@ entry App:
 		bricks+=Brick
 		(bricks+=Brick)*
 
+		('ldcs'
+        ldcs+=LDC
+        (ldcs+=LDC)*)?
+
 		('exceptions'
         exceptions+=Exception
         (exceptions+=Exception)*)?
+
 		
 		'states'
 		states+=State
 		(states+=State)*
 	'}';
+
+LDC :
+    name=ID '{'
+        'show' sensor=[Sensor:ID]
+        'rs' ':' rs=INT
+        'en' ':' en=INT
+        'd4' ':' d4=INT
+        'd5' ':' d5=INT
+        'd6' ':' d6=INT
+        'd7' ':' d7=INT
+        'backlight' ':' backlight=INT
+    '}';
 
 Brick :
 	(Actuator | Sensor);

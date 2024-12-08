@@ -67,21 +67,7 @@
 			return conditions.size() > 0 ? conditions.remove(0) : null
 		}
 
-		def buildTransition(GroovuinoMLBinding binding, State state1, State state2) {
-			this.binding = binding
-			this.state1 = state1
-			this.state2 = state2
-			this
-		}
-
-		def buildError(GroovuinoMLBinding binding, Number errornumber) {
-			this.binding = binding
-			this.mode = CONDITIONBUIDERMODE.ERROR
-			this.numberError = errornumber
-			this
-		}
-
-		def when(String sensor) {
+		def when(sensor) {
 			[
 					becomes: { signal ->
 						conditions.add(new SensorCondition(
@@ -110,7 +96,7 @@
 
 
 		def after(Number delay) {
-			conditions.add(new TemporalCondition(delay))
+			conditions.add(new TemporalCondition(delay.intValue()))
 			this
 		}
 
@@ -273,8 +259,6 @@
 		def throwerror(Number errornumber) {
 			new ErrorBuilder((GroovuinoMLBinding) this.getBinding(), errornumber)
 		}
-
-
 
 		// export name
 		def export(String name) {

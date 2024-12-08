@@ -1,0 +1,29 @@
+app RedButton initial state off {
+	bricks
+		Actuator red_led : 9
+
+		Sensor button : 10
+
+	ldcs
+	    myLDC {
+            show button
+	        rs : 10
+	        en : 11
+	        d4 : 12
+	        d5 : 13
+	        d6 : 14
+	        d7 : 15
+	        backlight : 16
+	    }
+
+	states
+		off {
+			red_led <= LOW
+			button is HIGH => on
+		}
+		on {
+			red_led <= HIGH
+			button is LOW => off
+		}
+}
+

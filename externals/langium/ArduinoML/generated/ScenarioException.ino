@@ -23,21 +23,20 @@ void setup() {
 }
     
 void loop() {
-if(exceptionNumber > 0){
+   if(exceptionNumber > 0){
         for(int i = exceptionNumber; i > 0; i--){
             digitalWrite(12, HIGH);
-            delay(600);
+            delay(400);
             digitalWrite(12, LOW);
-            delay(200);
+            delay(100);
         }
         delay(1200);
         return;
     }
 
-    button1BounceGuard = millis() - button1LastDebounceTime > debounce;
     button2BounceGuard = millis() - button2LastDebounceTime > debounce;
 
-   if((( digitalRead(10) == HIGH  && button1BounceGuard) && ( digitalRead(11) == HIGH  && button2BounceGuard))){
+   if(( digitalRead(11) == HIGH  && button2BounceGuard)){
         exceptionNumber = 3;
         return;
     }
@@ -46,24 +45,24 @@ if(exceptionNumber > 0){
         case off:
             digitalWrite(9,LOW);
 
-            button2BounceGuard = millis() - button2LastDebounceTime > debounce;
+            button1BounceGuard = millis() - button1LastDebounceTime > debounce;
 
-            if (( digitalRead(11) == HIGH  && button2BounceGuard))  {
+            if (( digitalRead(10) == HIGH  && button1BounceGuard))  {
                 currentState = on;
                 startTime = millis();
-                button2LastDebounceTime = millis();
+                button1LastDebounceTime = millis();
             }
             break;
 
         case on:
             digitalWrite(9,HIGH);
 
-            button2BounceGuard = millis() - button2LastDebounceTime > debounce;
+            button1BounceGuard = millis() - button1LastDebounceTime > debounce;
 
-            if (( digitalRead(11) == LOW  && button2BounceGuard))  {
+            if (( digitalRead(10) == LOW  && button1BounceGuard))  {
                 currentState = off;
                 startTime = millis();
-                button2LastDebounceTime = millis();
+                button1LastDebounceTime = millis();
             }
             break;
 

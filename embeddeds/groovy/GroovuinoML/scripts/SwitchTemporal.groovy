@@ -1,5 +1,3 @@
-//Alan wants to define a state machine where LED1 is switched on
-//after a push on button B1 and switched off 800ms after, waiting again for a new push on B1.
 
 sensor "B1" onPin 9
 actuator "LED1" pin 12

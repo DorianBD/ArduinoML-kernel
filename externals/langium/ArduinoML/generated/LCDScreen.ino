@@ -8,7 +8,7 @@ enum STATE {off, on};
 
 STATE currentState = off;
 
-long ldcDebounce = 1000;
+long ldcDebounce = 400;
 LiquidCrystal myLDC(10, 11, 12, 13, 14, 15, 16);
 long myLDCLastSetTime = 0;
 

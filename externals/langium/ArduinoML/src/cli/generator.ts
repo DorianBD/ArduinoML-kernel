@@ -51,7 +51,7 @@ STATE currentState = ` + app.initial.ref?.name + `;`
     newLine(fileNode);
 
     if (app.ldcs.length > 0) {
-        fileNode.append(`long ldcDebounce = 1000;`, NL);
+        fileNode.append(`long ldcDebounce = 400;`, NL);
         for (const ldc of app.ldcs) {
             compileLDC(ldc, fileNode);
             //create ldc last set time

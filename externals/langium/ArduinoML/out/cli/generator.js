@@ -35,7 +35,7 @@ enum STATE {` + app.states.map(s => s.name).join(', ') + `};
 STATE currentState = ` + ((_a = app.initial.ref) === null || _a === void 0 ? void 0 : _a.name) + `;`, langium_1.NL);
     newLine(fileNode);
     if (app.ldcs.length > 0) {
-        fileNode.append(`long ldcDebounce = 1000;`, langium_1.NL);
+        fileNode.append(`long ldcDebounce = 400;`, langium_1.NL);
         for (const ldc of app.ldcs) {
             compileLDC(ldc, fileNode);
             //create ldc last set time

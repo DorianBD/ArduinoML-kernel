@@ -46,8 +46,8 @@ Sensor :
 	
 State :
 	name=ID '{'
-		actions+=Action
-		(actions+=Action)*
+		(actions+=Action
+		(actions+=Action)*)?
 		transitions+=Transition
 		(transitions+=Transition)*
 	'}';

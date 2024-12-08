@@ -4,6 +4,7 @@ import io.github.mosser.arduinoml.kernel.behavioral.*;
 import io.github.mosser.arduinoml.kernel.behavioral.Error;
 import io.github.mosser.arduinoml.kernel.structural.*;
 import io.github.mosser.arduinoml.kernel.App;
+import io.github.mosser.arduinoml.kernel.structural.UnaryOperator;
 
 import java.util.HashMap;
 import java.util.Map;

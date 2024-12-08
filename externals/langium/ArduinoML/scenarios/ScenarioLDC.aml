@@ -1,8 +1,6 @@
 app RedButton initial state off {
 	bricks
-		Actuator red_led : 9
-
-		Sensor button : 10
+		Sensor button : 9
 
 	ldcs
 	    myLDC {
@@ -18,11 +16,9 @@ app RedButton initial state off {
 
 	states
 		off {
-			red_led <= LOW
 			button is HIGH => on
 		}
 		on {
-			red_led <= HIGH
 			button is LOW => off
 		}
 }

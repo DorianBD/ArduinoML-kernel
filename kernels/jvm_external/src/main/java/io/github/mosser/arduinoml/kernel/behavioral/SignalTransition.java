@@ -36,6 +36,7 @@ public class SignalTransition extends Transition {
             return value;
         }
     }
+
     public SignalTransition() {
     }
 

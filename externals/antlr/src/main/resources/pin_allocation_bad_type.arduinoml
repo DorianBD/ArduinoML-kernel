@@ -6,11 +6,6 @@ sensor potar : ANALOG
 actuator motor : ANALOG
 actuator motorA : ANOLOGIC
 actuator motorB : ANALOG
-actuator motorC : ANALOG
-actuator motorD : ANALOG
-actuator motorE : ANALOG
-actuator motorF : ANALOG
-
 # Declaring states
 on {
     led <= HIGH

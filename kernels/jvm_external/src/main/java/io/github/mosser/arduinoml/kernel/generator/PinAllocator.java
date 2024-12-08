@@ -15,9 +15,9 @@ public class PinAllocator {
 
     public PinAllocator() {
         // Définir les broches disponibles selon les contraintes matérielles
-        availableAnalogInputs = new ArrayList<>(List.of(14, 15, 16, 17, 18, 19));
-        availableAnalogOuputs = new ArrayList<>(List.of(3, 5, 6, 9, 10, 11));
-        availableDigitalIO = new ArrayList<>(List.of(0,1,2,3,4,5,6,7,8,9,10,11,12,13));
+        availableAnalogInputs = new ArrayList<>(List.of(15, 16, 17, 18, 19));
+        availableAnalogOuputs = new ArrayList<>(List.of(9, 10, 11));
+        availableDigitalIO = new ArrayList<>(List.of(8,9,10,11,12,13));
         reservedPins = new ArrayList<>();
     }
 

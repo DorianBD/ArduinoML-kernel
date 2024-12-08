@@ -7,6 +7,7 @@ import {
     App,
     BinaryCondition,
     Condition,
+    LDC,
     Sensor,
     SensorCondition,
     State,
@@ -36,13 +37,27 @@ function compile(app: App, fileNode: CompositeGeneratorNode) {
     fileNode.append(
         `
 //Wiring code generated from an ArduinoML model
-// Application name: ` + app.name + `
+// Application name: ` + app.name, NL);
 
+    if (app.ldcs.length > 0) {
+        fileNode.append(`#include <LiquidCrystal.h>`, NL);
+    }
+    fileNode.append(`
 long debounce = 200;
 enum STATE {` + app.states.map(s => s.name).join(', ') + `};
 
 STATE currentState = ` + app.initial.ref?.name + `;`
         , NL);
+    newLine(fileNode);
+
+    if (app.ldcs.length > 0) {
+        for (const ldc of app.ldcs) {
+            compileLDC(ldc, fileNode);
+        }
+        newLine(fileNode);
+    }
+
+
     const EXCEPTION_HIGH_DURATION = 400;
     const EXCEPTION_LOW_DURATION = 100;
     const EXCEPTION_IDLE_DURATION = 1200;
@@ -74,9 +89,14 @@ long ` + brick.name + `LastDebounceTime = 0;`, NL);
     fileNode.append(`}
     
 void loop() {`, NL);
+    //write in the ldcs the values of their sensors
+    for (const ldc of app.ldcs) {
+        compileLDCWrite(ldc, fileNode);
+    }
+
     if (app.exceptions.length > 0) {
 
-        fileNode.append(`if(exceptionNumber > 0){
+        fileNode.append(`   if(exceptionNumber > 0){
         for(int i = exceptionNumber; i > 0; i--){
             digitalWrite(${EXCEPTION_LED_PIN}, HIGH);
             delay(${EXCEPTION_HIGH_DURATION});
@@ -115,6 +135,21 @@ void loop() {`, NL);
     }
     fileNode.append(getTabString(1) + `}
 }`, NL);
+
+}
+
+function compileLDC(ldc: LDC, fileNode: CompositeGeneratorNode) {
+    fileNode.append(`LiquidCrystal ` + ldc.name + `(` + ldc.rs + `, ` + ldc.en + `, ` + ldc.d4 + `, ` + ldc.d5 + `, ` + ldc.d6 + `, ` + ldc.d7 + `, ` + ldc.backlight + `);`, NL)
+}
+
+function compileLDCWrite(ldc: LDC, fileNode: CompositeGeneratorNode) {
+    //  lcd.print the value of their sensor ex : button := HIGH
+    fileNode.append(`   ` + ldc.name + `.clear();`, NL);
+    const sensor = ldc.sensor.ref;
+    fileNode.append(`   ` + ldc.name + `.print(String("` + sensor?.name + ` := ") + (digitalRead(` + sensor?.inputPin + `) == HIGH ? "HIGH" : "LOW"));`,
+        NL
+    );
+
 
 }
 

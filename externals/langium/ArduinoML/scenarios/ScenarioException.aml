@@ -6,16 +6,16 @@ app RedButton initial state off {
 		Sensor button2 : 11
 
     exceptions
-        ( button1 is HIGH AND button2 is HIGH) => 3
+        button2 is HIGH => 3
 
 	states
 		off {
 			red_led <= LOW
-			button2 is HIGH => on
+			button1 is HIGH => on
 		}
 		on {
 			red_led <= HIGH
-			button2 is LOW => off
+			button1 is LOW => off
 		}
 }
 

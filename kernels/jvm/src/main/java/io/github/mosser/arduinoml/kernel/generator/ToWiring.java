@@ -313,15 +313,17 @@ public class ToWiring extends Visitor<StringBuffer> {
 		{
 			Set<Sensor> sens = getSensors(((BinaryCondition) condition).getLeft());
 			Set<Sensor> sensRight = getSensors(((BinaryCondition) condition).getRight());
-			sens.addAll(sensRight);
+			for(Sensor sensor : sensRight) {
+				sens.add(sensor);
+			}
 			return sens;
 		}
 		else if (condition.getClass().equals(TemporalCondition.class))
 		{
-			return Set.of();
+			return new HashSet<>();
 		}
 		else {
-			return Set.of();
+			return new HashSet<>();
 		}
 	}
 }

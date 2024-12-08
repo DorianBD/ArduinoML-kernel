@@ -20,6 +20,7 @@ class GroovuinoMLDSL {
 		
 		binding.setVariable("high", SIGNAL.HIGH)
 		binding.setVariable("low", SIGNAL.LOW)
+
 		for (TimeUnit unit : TimeUnit.values()) {
 			binding.setVariable(unit.name().toLowerCase(), unit);
 		}

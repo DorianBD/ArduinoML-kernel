@@ -10,4 +10,4 @@ initial "off"
 from "on" to "off" when "button1" becomes "high" end
 from "off" to "on" when "button1" becomes "high" end
 
-export "Switch!"
+export "Scenario4!"

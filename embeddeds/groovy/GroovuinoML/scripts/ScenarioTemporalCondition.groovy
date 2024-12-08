@@ -6,7 +6,7 @@ state "off" means led becomes low
 
 initial "off"
 
-from off to on when bouton becomes high end
-from on to off after 800 end
+from off to on after 6000 orwhen bouton becomes high end
+from on to off when bouton becomes high andafter 3000 orafter 20000 end
 
-export "Switch!"
+export "TempCondition!"

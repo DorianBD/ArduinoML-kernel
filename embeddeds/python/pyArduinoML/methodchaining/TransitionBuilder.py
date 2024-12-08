@@ -19,9 +19,10 @@ class TransitionBuilder:
         :return:
         """
         self.root = root
-        self.sensor = sensor
-        self.value = None  # SIGNAL, state of the brick to trigger the transition
         self.next_state = None  # String, name of the target state
+        self.conditions = []
+        self.conditions.append({"sensor": sensor, "value": None, "operator": "FIRST"})
+    
 
     def has_value(self, value):
         """
@@ -31,6 +32,30 @@ class TransitionBuilder:
         :return: TransitionBuilder, the builder
         """
         self.value = value
+        self.conditions[0].update({"value": value})
+        return self
+    
+    def and_when(self, sensor):
+        """ 
+        Add an action to the transition.
+        """
+        self.conditions.append({"sensor": sensor, "value": None, "operator": "AND"})
+        return self
+    
+    def or_when(self, sensor):
+        """ 
+        Add an action to the transition.
+        """
+        self.conditions.append({"sensor": sensor, "value": None, "operator": "OR"})
+        return self
+    
+    def with_value(self, value):
+        """
+        Specify the value of the last added action.
+        """
+        if len(self.conditions) == 0:
+            raise Exception("No condition to set value to.")
+        self.conditions[-1]["value"] = value
         return self
 
     def go_to_state(self, next_state):
@@ -55,6 +80,21 @@ class TransitionBuilder:
         """
         if self.sensor not in bricks.keys():
             raise UndefinedBrick()
+        for condition in self.conditions:
+            if condition["sensor"] not in bricks.keys():
+                raise UndefinedBrick()
         if self.next_state not in states.keys():
             raise UndefinedState()
-        return Transition(bricks[self.sensor], self.value, states[self.next_state])
+        
+        transition = Transition(
+            sensor=bricks[self.sensor],
+            value=self.value,
+            next_state= states[self.next_state],
+        )
+        # Set the conditions of the transition with the correct sensors, values and operators
+        transition.conditions = [
+            {"sensor": bricks[cond["sensor"]], "value": cond["value"], "operator": cond["operator"]}
+            for cond in self.or_conditions
+        ]
+    
+        return transition

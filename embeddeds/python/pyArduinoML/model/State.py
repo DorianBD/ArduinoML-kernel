@@ -1,7 +1,7 @@
 __author__ = 'pascalpoizat'
 
 from pyArduinoML.model.NamedElement import NamedElement
-import SIGNAL
+import pyArduinoML.model.SIGNAL as SIGNAL
 
 class State(NamedElement):
     """
@@ -30,7 +30,7 @@ class State(NamedElement):
         """
         self.transition = transition
 
-    def setup(self):
+    def setup(self, errors):
         """
         Arduino code for the state.
 
@@ -38,14 +38,24 @@ class State(NamedElement):
         """
         rtr = ""
         rtr += "void state_%s() {\n" % self.name
-        # generate code for state actions
+
+        # Generate the code for the actions
         for action in self.actions:
             rtr += "\tdigitalWrite(%s, %s);\n" % (action.brick.name, SIGNAL.value(action.value))
-            rtr += "\tboolean guard =  millis() - time > debounce;\n"
-        # generate code for the transition
-        transition = self.transition
-        rtr += "\tif (digitalRead(%s) == %s && guard) {\n\t\ttime = millis(); state_%s();\n\t} else {\n\t\tstate_%s();\n\t}" \
-               % (transition.sensor.name, SIGNAL.value(transition.value), transition.nextstate.name, self.name)
-        # end of state
-        rtr += "\n}\n"
+
+        rtr += "\tboolean guard = millis() - time > debounce;\n"
+
+        # Generate the code for the transition
+        transition_condition = self.transition.to_arduino_condition()
+        rtr += "\tif (%s && guard) {\n" % transition_condition
+        rtr += "\t\ttime = millis();\n \t\tstate_%s();\n" % self.transition.nextstate.name
+        if(errors != ()):
+            for error in errors:
+                rtr += "\t} else if (digitalRead(%s) == %s && guard) {\n" % (error.sensor, error.value)
+                rtr += "\t\ttime = millis();\n \t\tstate_error(%s);\n" % error.error_code
+        rtr += "\t} else {\n"
+        rtr += "\t\tstate_%s();\n" % self.name  # Loop on the same state
+        rtr += "\t}\n"
+        rtr += "}\n"
+
         return rtr

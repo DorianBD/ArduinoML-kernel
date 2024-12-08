@@ -19,24 +19,22 @@ int exceptionNumber = 0;
 long startTime = millis();
 
 void setup() {
-   pinMode(9, OUTPUT); // red_led [Actuator]
-   pinMode(10, INPUT); // button [Sensor]
+   pinMode(9, INPUT); // button [Sensor]
 }
     
 void loop() {
    if(millis() - myLDCLastSetTime > ldcDebounce){
        myLDC.clear();
-       myLDC.print(String("button := ") + (digitalRead(10) == HIGH ? "HIGH" : "LOW"));
+       myLDC.print(String("button := ") + (digitalRead(9) == HIGH ? "HIGH" : "LOW"));
        myLDCLastSetTime = millis();
     }
 
    switch(currentState){
         case off:
-            digitalWrite(9,LOW);
 
             buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
 
-            if (( digitalRead(10) == HIGH  && buttonBounceGuard))  {
+            if (( digitalRead(9) == HIGH  && buttonBounceGuard))  {
                 currentState = on;
                 startTime = millis();
                 buttonLastDebounceTime = millis();
@@ -44,11 +42,10 @@ void loop() {
             break;
 
         case on:
-            digitalWrite(9,HIGH);
 
             buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
 
-            if (( digitalRead(10) == LOW  && buttonBounceGuard))  {
+            if (( digitalRead(9) == LOW  && buttonBounceGuard))  {
                 currentState = off;
                 startTime = millis();
                 buttonLastDebounceTime = millis();

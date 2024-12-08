@@ -13,7 +13,7 @@ app RedButton initial state off {
 		}
 		on {
 			buzzer <= HIGH
-			      ( button1 is LOW OR button2 is LOW )  => off
+            ( button1 is LOW OR button2 is LOW )  => off
 		}
 }
 

@@ -1,8 +1,8 @@
 package io.github.mosser.arduinoml.kernel.generator;
 
+import io.github.mosser.arduinoml.kernel.structural.Actuator;
 import io.github.mosser.arduinoml.kernel.structural.Brick;
 import io.github.mosser.arduinoml.kernel.structural.Sensor;
-import io.github.mosser.arduinoml.kernel.structural.Actuator;
 
 import java.util.ArrayList;
 import java.util.List;

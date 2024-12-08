@@ -3,9 +3,10 @@
 // Application name: RedButton
 
 long debounce = 200;
-enum STATE {a, b, c};
+enum STATE {off, on};
 
-STATE currentState = a;
+STATE currentState = off;
+
 bool buttonBounceGuard = false;
 long buttonLastDebounceTime = 0;
 
@@ -21,40 +22,27 @@ void setup() {
 void loop() {
 
    switch(currentState){
-        case a:
+        case off:
             digitalWrite(9,LOW);
             digitalWrite(10,LOW);
 
             buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
 
             if (( digitalRead(11) == HIGH  && buttonBounceGuard))  {
-                currentState = b;
+                currentState = on;
                 startTime = millis();
                 buttonLastDebounceTime = millis();
             }
             break;
 
-        case b:
-            digitalWrite(9,LOW);
+        case on:
+            digitalWrite(9,HIGH);
             digitalWrite(10,HIGH);
 
             buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
 
-            if (( digitalRead(11) == HIGH  && buttonBounceGuard))  {
-                currentState = c;
-                startTime = millis();
-                buttonLastDebounceTime = millis();
-            }
-            break;
-
-        case c:
-            digitalWrite(9,HIGH);
-            digitalWrite(10,LOW);
-
-            buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
-
-            if (( digitalRead(11) == HIGH  && buttonBounceGuard))  {
-                currentState = a;
+            if (( digitalRead(11) == LOW  && buttonBounceGuard))  {
+                currentState = off;
                 startTime = millis();
                 buttonLastDebounceTime = millis();
             }

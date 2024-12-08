@@ -7,9 +7,6 @@ enum STATE {off, on};
 
 STATE currentState = off;
 
-bool buzzerBounceGuard = false;
-long buzzerLastDebounceTime = 0;
-
 bool buttonBounceGuard = false;
 long buttonLastDebounceTime = 0;
 
@@ -18,7 +15,6 @@ long startTime = millis();
 
 void setup() {
    pinMode(9, OUTPUT); // red_led [Actuator]
-   pinMode(10, INPUT); // buzzer [Sensor]
    pinMode(11, INPUT); // button [Sensor]
 }
     
@@ -42,7 +38,7 @@ void loop() {
 
             buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
 
-            if (( digitalRead(11) == LOW  && buttonBounceGuard))  {
+            if (( digitalRead(11) == HIGH  && buttonBounceGuard))  {
                 currentState = off;
                 startTime = millis();
                 buttonLastDebounceTime = millis();

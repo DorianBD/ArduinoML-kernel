@@ -23,7 +23,7 @@ We consider here that the current directory is the `antlr` directory.
   2. Then, compile the ANTLR code
     * `mvn clean package`
   3. Run the compiler using the `exec` plugin:
-    * `mvn exec:java -Dexec.args=src/main/resources/pin_allocation_too_many_analogOutput.arduinoml`
+    * `mvn exec:java -Dexec.args=src/main/resources/dual_check_alarm.arduinoml`
     
 ## Code Description
 
@@ -65,13 +65,13 @@ We added a new class `PinAllocator` in the kernel module. In order to use it, at
 
 ### PIN Allocation
 According to this sheme, here is the pin allocation for the different components:
-![Pin Allocation](../../docs/arduino_uno.png)
+![Pin Allocation](../../docs/busPins.png)
 
-| Type de Broche	 | Numéros des broches                             |
-|-----------------|-------------------------------------------------|
-| Analog IN       | 	A0(14), A1(15), A2(16), A3(17), A4(18), A5(19) |
-| Digital IN/OUT  | 	0 - 13                                         |
-| PWM (Analog OUT)	| 3, 5, 6, 9, 10, 11                              |
+| Type de Broche	 | Numéros des broches                     |
+|-----------------|-----------------------------------------|
+| Analog IN       | 	A1(15), A2(16), A3(17), A4(18), A5(19) |
+| Digital IN/OUT  | 	8 - 12                                 |
+| PWM (Analog OUT)	| 9, 10, 11                      |
 
 ### Example
 

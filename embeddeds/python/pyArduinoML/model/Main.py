@@ -28,7 +28,7 @@ def demo():
 
     app = App("Switch!", [button, led], [off, on])
 
-    print app
+    print (app)
 
 
 if __name__ == '__main__':

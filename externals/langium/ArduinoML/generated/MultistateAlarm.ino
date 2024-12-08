@@ -3,9 +3,10 @@
 // Application name: RedButton
 
 long debounce = 200;
-enum STATE {off, on};
+enum STATE {a, b, c};
 
-STATE currentState = off;
+STATE currentState = a;
+
 bool buttonBounceGuard = false;
 long buttonLastDebounceTime = 0;
 
@@ -14,31 +15,47 @@ long startTime = millis();
 
 void setup() {
    pinMode(9, OUTPUT); // red_led [Actuator]
+   pinMode(10, OUTPUT); // buzzer [Actuator]
    pinMode(11, INPUT); // button [Sensor]
 }
     
 void loop() {
 
    switch(currentState){
-        case off:
+        case a:
             digitalWrite(9,LOW);
+            digitalWrite(10,LOW);
 
             buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
 
             if (( digitalRead(11) == HIGH  && buttonBounceGuard))  {
-                currentState = on;
+                currentState = b;
                 startTime = millis();
                 buttonLastDebounceTime = millis();
             }
             break;
 
-        case on:
-            digitalWrite(9,HIGH);
+        case b:
+            digitalWrite(9,LOW);
+            digitalWrite(10,HIGH);
 
             buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
 
             if (( digitalRead(11) == HIGH  && buttonBounceGuard))  {
-                currentState = off;
+                currentState = c;
+                startTime = millis();
+                buttonLastDebounceTime = millis();
+            }
+            break;
+
+        case c:
+            digitalWrite(9,HIGH);
+            digitalWrite(10,LOW);
+
+            buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
+
+            if (( digitalRead(11) == HIGH  && buttonBounceGuard))  {
+                currentState = a;
                 startTime = millis();
                 buttonLastDebounceTime = millis();
             }

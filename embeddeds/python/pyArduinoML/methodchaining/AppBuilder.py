@@ -3,6 +3,7 @@ __author__ = 'pascalpoizat'
 from pyArduinoML.model.App import App
 from pyArduinoML.methodchaining.BrickBuilder import BrickBuilder
 from pyArduinoML.methodchaining.StateBuilder import StateBuilder
+from pyArduinoML.methodchaining.ErrorBuilder import ErrorBuilder
 from pyArduinoML.methodchaining.BrickBuilder import ACTUATOR, SENSOR
 
 
@@ -21,6 +22,7 @@ class AppBuilder:
         self.name = name
         self.bricks = []  # List[BrickBuider], builders for the bricks
         self.states = []  # List[StateBuilder], builders for the states
+        self.errors = []  # List[ErrorBuilder], builders for the errors
 
     def actuator(self, actuator):
         """
@@ -79,5 +81,24 @@ class AppBuilder:
         # build the transitions (2-step pass due to the meta-model)
         for builder in self.states:
             builder.get_contents2(bricks, states)
+        # build the errors
+        errors = []
+        for builder in self.errors:
+            errors.append(builder.build())
+
+        if(len(errors) != 0):
+            error_bricks = BrickBuilder(self, "ERROR", ACTUATOR)
+            error_bricks.on_pin(12)
+            error = error_bricks.get_contents()
+            bricks[error.name] = error
+        
         # build the app
-        return App(self.name, bricks.values(), state_values)
+        return App(self.name, bricks.values(), state_values, errors)
+    
+    def throw_error(self, error_code):
+        """
+        Throws an error.
+        """
+        builder = ErrorBuilder(self, error_code)
+        self.errors.append(builder)
+        return builder

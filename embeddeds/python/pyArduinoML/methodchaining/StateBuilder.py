@@ -74,14 +74,16 @@ class StateBuilder:
         A 2-step build is required (due to the meta-model) to get references right while avoiding bad typing tricks
         such as passing a TransitionBuilder instead of a Transition.
         """
-        if self.transition.sensor not in bricks.keys():
-            raise UndefinedBrick()
+        for cond in self.transition.conditions:
+            if cond["sensor"] not in bricks.keys():
+                raise UndefinedBrick()
         if self.state not in states.keys():
             raise UndefinedState()
         if self.transition.next_state not in states.keys():
             raise UndefinedState()
-        transition = Transition(bricks[self.transition.sensor],
-                                self.transition.value,
+        transition = Transition(self.transition.conditions,
                                 states[self.transition.next_state])
+    
+        
         states[self.state].transition = transition
 

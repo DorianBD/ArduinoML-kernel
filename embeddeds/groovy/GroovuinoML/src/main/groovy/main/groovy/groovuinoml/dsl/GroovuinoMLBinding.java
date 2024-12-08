@@ -40,6 +40,10 @@ public class GroovuinoMLBinding extends Binding {
 			System.out.println("Seb, c'est bien");
 			return script;
 		}
+		if("end".equals(name)) {
+			((GroovuinoMLBasescript) script).end();
+			return script;
+		}
 		return super.getVariable(name);
 	}
 	

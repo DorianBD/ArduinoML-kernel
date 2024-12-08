@@ -1,6 +1,7 @@
 package io.github.mosser.arduinoml.kernel.generator;
 
 import io.github.mosser.arduinoml.kernel.behavioral.*;
+import io.github.mosser.arduinoml.kernel.behavioral.Error;
 import io.github.mosser.arduinoml.kernel.structural.*;
 import io.github.mosser.arduinoml.kernel.App;
 
@@ -24,6 +25,8 @@ public abstract class Visitor<T> {
 	public abstract void visit(UnaryCondition condition);
 	public abstract void visit(UnaryOperator operator);
 	public abstract void visit(BinaryOperator operator);
+
+	public abstract void visit(Error error);
 
 
 

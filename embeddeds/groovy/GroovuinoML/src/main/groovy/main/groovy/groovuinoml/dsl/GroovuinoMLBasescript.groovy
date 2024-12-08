@@ -16,17 +16,69 @@
 	import io.github.mosser.arduinoml.kernel.behavioral.BinaryCondition
 	import io.github.mosser.arduinoml.kernel.behavioral.BinaryOperator
 
-	class TransitionBuilder {
-		private GroovuinoMLBinding binding
+	class ErrorBuilder extends ConditionBuilder {
+		private int errornumber
+
+
+		public ErrorBuilder(GroovuinoMLBinding binding, Number errornumber) {
+			this.binding = binding
+			this.errornumber = errornumber.intValue()
+		}
+
+		@Override
+		def end() {
+			def model = getBinding().getGroovuinoMLModel()
+			model.createError(this.getCondition(), errornumber)
+		}
+	}
+
+	class TransitionBuilder extends ConditionBuilder {
 		private State state1
 		private State state2
-		private List<Condition> conditions = []
-		private Condition lastCondition = null // Permet de garder une trace de la dernière condition
 
-		TransitionBuilder(GroovuinoMLBinding binding, State state1, State state2) {
+		public TransitionBuilder(GroovuinoMLBinding binding, State state1, State state2) {
 			this.binding = binding
 			this.state1 = state1
 			this.state2 = state2
+		}
+
+		@Override
+		def end() {
+			def model = getBinding().getGroovuinoMLModel()
+			model.createTransition(state1, state2, getCondition())
+		}
+
+	}
+
+
+	abstract class ConditionBuilder {
+		GroovuinoMLBinding binding
+		List<Condition> conditions = []
+
+		List<Condition> getConditions() {
+			return conditions
+		}
+
+		GroovuinoMLBinding getBinding() {
+			return binding
+		}
+
+		Condition getCondition() {
+			return conditions.size() > 0 ? conditions.remove(0) : null
+		}
+
+		def buildTransition(GroovuinoMLBinding binding, State state1, State state2) {
+			this.binding = binding
+			this.state1 = state1
+			this.state2 = state2
+			this
+		}
+
+		def buildError(GroovuinoMLBinding binding, Number errornumber) {
+			this.binding = binding
+			this.mode = CONDITIONBUIDERMODE.ERROR
+			this.numberError = errornumber
+			this
 		}
 
 		def when(String sensor) {
@@ -137,19 +189,38 @@
 			this
 		}
 
-		def execute() {
-			if (lastCondition != null) {
-				conditions.add(lastCondition) // Ajoute la dernière condition restante
-				lastCondition = null
+		abstract end()
+
+		def propertyMissing(String name) {
+			if(name == "end") {
+				return end()
 			}
-			def model = binding.getGroovuinoMLModel()
-			model.createTransition(state1, state2, conditions.size() > 0 ? conditions.remove(0) : null)
+			else {
+				throw new MissingPropertyException(name, this.getClass())
+			}
 		}
+
 	}
 
 
 
 	abstract class GroovuinoMLBasescript extends Script {
+
+		ConditionBuilder currentTransitionBuilder = null
+
+		public getTransitionBuilder() {
+			return currentTransitionBuilder
+		}
+
+		public setTransitionBuilder(ConditionBuilder transitionBuilder) {
+			currentTransitionBuilder = transitionBuilder
+		}
+
+		public end() {
+			currentTransitionBuilder.end
+			currentTransitionBuilder = null
+
+		}
 
 	//	public static Number getDuration(Number number, TimeUnit unit) throws IOException {
 	//		return number * unit.inMillis;
@@ -195,8 +266,12 @@
 			[to: { state2 ->
 				def state1Resolved = state1 instanceof String ? (State) ((GroovuinoMLBinding) this.getBinding()).getVariable(state1) : (State) state1
 				def state2Resolved = state2 instanceof String ? (State) ((GroovuinoMLBinding) this.getBinding()).getVariable(state2) : (State) state2
-				return new TransitionBuilder((GroovuinoMLBinding) this.getBinding(), state1Resolved, state2Resolved)
+				new TransitionBuilder((GroovuinoMLBinding) this.getBinding(), state1Resolved, state2Resolved)
 			}]
+		}
+
+		def throwerror(Number errornumber) {
+			new ErrorBuilder((GroovuinoMLBinding) this.getBinding(), errornumber)
 		}
 
 

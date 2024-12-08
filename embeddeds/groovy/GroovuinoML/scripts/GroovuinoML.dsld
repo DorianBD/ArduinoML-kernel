@@ -34,10 +34,19 @@ contribute(currentType(subType('groovy.lang.Script'))) {
 	method type: Script, name: 'from', params: [stateName:String], doc: 'Define first state of a Transition'
 	method type: Script, name: 'to', params: [state:Object], doc: 'Define second state of a Transition'
 	method type: Script, name: 'to', params: [stateName:String], doc: 'Define second state of a Transition'
+
 	method type: Script, name: 'when', params: [sensor:Object], doc: 'Identify a Sensor that triggers the Transition'
 	method type: Script, name: 'when', params: [sensorName:String], doc: 'Identify a Sensor that triggers the Transition'
-	method type: Script, name: 'and', params: [sensor:Object], doc: 'Define another Sensor to triggers the Transition'
-	method type: Script, name: 'and', params: [sensorName:String], doc: 'Define another Sensor to triggers the Transition'
+	method type: Script, name: 'andwhen', params: [sensor:Object], doc: 'AND - Define another Sensor to triggers the Transition'
+	method type: Script, name: 'andwhen', params: [sensorName:String], doc: 'AND - Define another Sensor to triggers the Transition'
+	method type: Script, name: 'orwhen', params: [sensor:Object], doc: 'OR - Define another Sensor to triggers the Transition'
+	method type: Script, name: 'orwhen', params: [sensorName:String], doc: 'OR - Define another Sensor to triggers the Transition'
+
+	method type: Script, name: 'after', params: [delay:Number], doc: 'Define a delay before the Transition is triggered'
+	method type: Script, name: 'andafter', params: [delay:Number], doc: 'AND - Define a delay before the Transition is triggered'
+	method type: Script, name: 'orafter', params: [delay:Number], doc: 'OR - Define a delay before the Transition is triggered'
+
+	method type: Script, name: 'execute', params: [], doc: 'end the Transition definition'
 
 	method type: void, name: 'export', params: [name:String], doc: 'Export the Arduino Script and define its name'
 }

@@ -2,6 +2,7 @@ package io.github.mosser.arduinoml.kernel.generator;
 
 import io.github.mosser.arduinoml.kernel.App;
 import io.github.mosser.arduinoml.kernel.behavioral.*;
+import io.github.mosser.arduinoml.kernel.behavioral.Error;
 import io.github.mosser.arduinoml.kernel.structural.*;
 
 import java.util.HashSet;
@@ -31,6 +32,12 @@ public class ToWiring extends Visitor<StringBuffer> {
 		w(String.format("// Application name: %s\n", app.getName())+"\n");
 
 		w("long debounce = 200;\n");
+
+		if(!app.getErrors().isEmpty()){
+			w("\nint errorNumber = 0;\n\n");
+			w("bool error = false;\n");
+		}
+
 		w("\nenum STATE {");
 		String sep ="";
 		for(State state: app.getStates()){
@@ -52,18 +59,45 @@ public class ToWiring extends Visitor<StringBuffer> {
 		//second pass, setup and loop
 		context.put("pass",PASS.TWO);
 		w("\nvoid setup(){\n");
+
+		if(!app.getErrors().isEmpty()){
+			w("  pinMode(12, OUTPUT); //error associated led\n");
+		}
+
 		for(Brick brick: app.getBricks()){
 			brick.accept(this);
 		}
 		w("}\n");
 
-		w("\nvoid loop() {\n" +
-			"\tswitch(currentState){\n");
-		for(State state: app.getStates()){
+		w("\nvoid loop() {\n");
+
+		if(!app.getErrors().isEmpty()) {
+			w("\tif(");
+			generateError(app.getErrors().get(0));
+			w("\t}\n\n");
+			for (int i = 1; i < app.getErrors().size(); i++) {
+				app.getErrors().get(i).accept(this);
+			}
+			w("\tif(error){\n");
+			w("\t\tfor(;;) {\n");
+			w("\t\t\tfor(int i = 0; i < errorNumber; i++){\n");
+			w("\t\t\t\tdigitalWrite(12, HIGH);\n");
+			w("\t\t\t\tdelay(200);\n");
+			w("\t\t\t\tdigitalWrite(12, LOW);\n");
+			w("\t\t\t\tdelay(200);\n");
+			w("\t\t\t}\n");
+			w("\t\t\tdelay(500);\n");
+			w("\t\t}\n");
+			w("\t\treturn;\n");
+			w("\t}\n\n");
+		}
+
+		w("\tswitch(currentState){\n");
+		for (State state : app.getStates()) {
 			state.accept(this);
 		}
-		w("\t}\n" +
-			"}");
+		w("\t}\n");
+		w("}");
 	}
 
 	@Override
@@ -136,15 +170,6 @@ public class ToWiring extends Visitor<StringBuffer> {
 			w("\t\t\t\tcurrentState = " + transition.getNext().getName() + ";\n");
 			w("\t\t\t\tbreak;\n");
 			w("\t\t\t}\n");
-
-			/*String sensorName = transition.getSensor().getName();
-			w(String.format("\t\t\t%sBounceGuard = millis() - %sLastDebounceTime > debounce;\n",
-					sensorName, sensorName));
-			w(String.format("\t\t\tif( digitalRead(%d) == %s && %sBounceGuard) {\n",
-					transition.getSensor().getPin(), transition.getValue(), sensorName));
-			w(String.format("\t\t\t\t%sLastDebounceTime = millis();\n", sensorName));
-			w("\t\t\t\tcurrentState = " + transition.getNext().getName() + ";\n");
-			w("\t\t\t}\n");*/
 			return;
 		}
 	}
@@ -219,6 +244,33 @@ public class ToWiring extends Visitor<StringBuffer> {
 		}
 		if(context.get("pass") == PASS.TWO) {
 			w(operator.getOperator());
+			return;
+		}
+	}
+
+	@Override
+	public void visit(Error error) {
+		if(context.get("pass") == PASS.ONE) {
+			return;
+		}
+		if(context.get("pass") == PASS.TWO) {
+			w("\telse if(");
+			generateError(error);
+			w("\t}\n");
+			return;
+		}
+	}
+
+	public void generateError(Error error) {
+		if(context.get("pass") == PASS.ONE) {
+			return;
+		}
+		if(context.get("pass") == PASS.TWO) {
+
+			error.getCondition().accept(this);
+			w("){\n");
+			w("\t\terrorNumber = " + error.getNumberError() + ";\n");
+			w("\t\terror = true;\n");
 			return;
 		}
 	}

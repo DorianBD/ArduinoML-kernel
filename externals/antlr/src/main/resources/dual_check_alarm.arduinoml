@@ -13,5 +13,5 @@ buzz {
 
 -> off {
     buzzer <= LOW
-    (buttonA is LOW AND buttonB is LOW) => buzz
+    (buttonA is HIGH OR buttonB is HIGH) => buzz
 }

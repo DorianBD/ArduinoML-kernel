@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.mosser.arduinoml</groupId>
-            <artifactId>kernel-jvm</artifactId>
+            <artifactId>kernel-jvm-external</artifactId>
             <version>1.0</version>
         </dependency>
     </dependencies>

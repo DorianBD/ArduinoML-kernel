@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/ArduinoML-kernel.iml" filepath="$PROJECT_DIR$/.idea/ArduinoML-kernel.iml" />
+      <module fileurl="file://$PROJECT_DIR$/externals/antlr/external-antlr.iml" filepath="$PROJECT_DIR$/externals/antlr/external-antlr.iml" />
+      <module fileurl="file://$PROJECT_DIR$/kernels/jvm_external/kernel-jvm (1).iml" filepath="$PROJECT_DIR$/kernels/jvm_external/kernel-jvm (1).iml" />
     </modules>
   </component>
 </project>

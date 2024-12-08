@@ -12,21 +12,30 @@ declaration     :   'application' name=IDENTIFIER;
 bricks          :   (sensor|actuator)+;
     sensor      :   'sensor'   location ;
     actuator    :   'actuator' location ;
-    location    :   id=IDENTIFIER ':' port=PORT_NUMBER;
+    location    :   id=IDENTIFIER ':' type=TYPE;
 
 states          :   state+;
     state       :   initial? name=IDENTIFIER '{'  action+ transition '}';
     action      :   receiver=IDENTIFIER '<=' value=SIGNAL;
-    transition  :   trigger=IDENTIFIER 'is' value=SIGNAL '=>' next=IDENTIFIER ;
+    transition  :   condition '=>' next=IDENTIFIER ;
+
+    sensorCondition :   receiver=IDENTIFIER 'is' value=SIGNAL;
+    unaryCondition :   operator=UNARYOPERATOR condition;
+    binaryCondition : '(' left=condition operator=BINARYOPERATOR right=condition ')';
+
+    condition : (sensorCondition | unaryCondition | binaryCondition);
+
     initial     :   '->';
 
 /*****************
  ** Lexer rules **
  *****************/
 
-PORT_NUMBER     :   [1-9] | '11' | '12';
 IDENTIFIER      :   LOWERCASE (LOWERCASE|UPPERCASE)+;
 SIGNAL          :   'HIGH' | 'LOW';
+BINARYOPERATOR  :   'AND' | 'OR';
+TYPE            :   'ANALOG' | 'DIGITAL';
+UNARYOPERATOR   :   'NOT';
 
 /*************
  ** Helpers **

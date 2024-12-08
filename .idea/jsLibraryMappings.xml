@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaScriptLibraryMappings">
+    <excludedPredefinedLibrary name="ArduinoML-kernel/externals/xtext/.gradle/npm/npm-v6.10.2/lib/node_modules" />
+    <excludedPredefinedLibrary name="ArduinoML-kernel/externals/xtext/build/nodejs/node-v10.16.0-linux-x64/lib/node_modules" />
+    <excludedPredefinedLibrary name="ArduinoML-kernel/externals/xtext/node_modules" />
+    <excludedPredefinedLibrary name="ArduinoML-kernel/externals/xtext/vscode-extension-self-contained/.gradle/nodejs/node-v10.16.0-linux-x64/lib/node_modules" />
+    <excludedPredefinedLibrary name="ArduinoML-kernel/externals/xtext/vscode-extension-self-contained/.gradle/npm/npm-v6.10.2/lib/node_modules" />
+    <excludedPredefinedLibrary name="ArduinoML-kernel/externals/xtext/vscode-extension-self-contained/node_modules" />
+    <excludedPredefinedLibrary name="ArduinoML-kernel/externals/xtext/vscode-extension/.gradle/nodejs/node-v10.16.0-linux-x64/lib/node_modules" />
+    <excludedPredefinedLibrary name="ArduinoML-kernel/externals/xtext/vscode-extension/.gradle/npm/npm-v6.10.2/lib/node_modules" />
+    <excludedPredefinedLibrary name="ArduinoML-kernel/externals/xtext/vscode-extension/node_modules" />
+  </component>
+</project>

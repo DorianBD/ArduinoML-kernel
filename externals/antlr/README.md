@@ -84,3 +84,6 @@ According to this sheme, here is the pin allocation for the different components
 
 `mvn exec:java -Dexec.args=src/main/resources/pin_allocation_allon.arduinoml`
 -> This case tests the limits of your extension, requiring dynamic allocation for several digital and analog components.
+
+`mvn exec:java -Dexec.args=src/main/resources/pin_allocation_bad_type.arduinoml`
+-> This case should throw an exception due to the bad type of the component "ANALOGIC" instead of "ANALOG"

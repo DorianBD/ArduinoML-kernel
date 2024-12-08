@@ -1,0 +1,25 @@
+application redButton
+
+# Declaring bricks
+actuator led : DIGITAL
+sensor potar : ANALOG
+actuator motor : ANALOG
+actuator motorA : ANOLOGIC
+actuator motorB : ANALOG
+actuator motorC : ANALOG
+actuator motorD : ANALOG
+actuator motorE : ANALOG
+actuator motorF : ANALOG
+
+# Declaring states
+on {
+    led <= HIGH
+    motor <= HIGH
+    potar is LOW  => off
+}
+
+-> off {
+    led <= LOW
+    motor <= LOW
+    potar is HIGH => on
+}

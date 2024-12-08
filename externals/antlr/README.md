@@ -70,7 +70,7 @@ According to this sheme, here is the pin allocation for the different components
 | Type de Broche	 | Numéros des broches                     |
 |-----------------|-----------------------------------------|
 | Analog IN       | 	A1(15), A2(16), A3(17), A4(18), A5(19) |
-| Digital IN/OUT  | 	8 - 13                                 |
+| Digital IN/OUT  | 	8 - 12                                 |
 | PWM (Analog OUT)	| 9, 10, 11                      |
 
 ### Example

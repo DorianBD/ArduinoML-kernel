@@ -1,10 +1,14 @@
 package io.github.mosser.arduinoml.kernel.samples;
 
 import io.github.mosser.arduinoml.kernel.App;
-import io.github.mosser.arduinoml.kernel.behavioral.*;
+import io.github.mosser.arduinoml.kernel.behavioral.Action;
+import io.github.mosser.arduinoml.kernel.behavioral.SignalTransition;
+import io.github.mosser.arduinoml.kernel.behavioral.State;
 import io.github.mosser.arduinoml.kernel.generator.ToWiring;
 import io.github.mosser.arduinoml.kernel.generator.Visitor;
-import io.github.mosser.arduinoml.kernel.structural.*;
+import io.github.mosser.arduinoml.kernel.structural.Actuator;
+import io.github.mosser.arduinoml.kernel.structural.SIGNAL;
+import io.github.mosser.arduinoml.kernel.structural.Sensor;
 
 import java.util.Arrays;
 
@@ -44,11 +48,11 @@ public class Switch {
 		// Creating transitions
 		SignalTransition on2off = new SignalTransition();
 		on2off.setNext(off);
-		on2off.addCondition(button,SIGNAL.HIGH);
+		on2off.addSimpleCondition(button,SIGNAL.HIGH);
 
 		SignalTransition off2on = new SignalTransition();
 		off2on.setNext(on);
-		off2on.addCondition(button,SIGNAL.HIGH);
+		off2on.addSimpleCondition(button,SIGNAL.HIGH);
 
 		// Binding transitions to states
 		on.setTransition(on2off);
